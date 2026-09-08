@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { ROUTES, navigate, type Route } from '../lib/router';
 import { useStore } from '../store/store';
 import { cx, Modal } from './ui';
+import { SyncPanel } from './SyncPanel';
 import { formatShort, today } from '../lib/date';
 
 const NAV: { route: Route; label: string; hint: string }[] = [
@@ -85,11 +86,22 @@ function DataMenu() {
         Daten & Sicherung
       </button>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Daten & Sicherung">
-        <p className="prose-note mb-6">
-          Alles bleibt auf diesem Gerät. Nichts wird gesendet, nichts wird gemessen.
-          Ein Backup ist eine einzelne JSON-Datei — lesbar, portabel, deins.
-        </p>
+      <Modal open={open} onClose={() => setOpen(false)} title="Daten & Sicherung" wide>
+        <section className="mb-8">
+          <h3 className="display mb-3 text-lg text-ink-700 dark:text-paper-100">
+            Geräte abgleichen
+          </h3>
+          <SyncPanel />
+        </section>
+
+        <section className="border-t rule pt-6">
+          <h3 className="display mb-3 text-lg text-ink-700 dark:text-paper-100">
+            Sicherung als Datei
+          </h3>
+          <p className="prose-note mb-5">
+            Ohne Abgleich bleibt alles auf diesem Gerät. Ein Backup ist eine
+            einzelne JSON-Datei — lesbar, portabel, deins.
+          </p>
 
         <div className="space-y-3">
           <button type="button" onClick={exportJSON} className="btn-quiet w-full justify-start">
@@ -142,6 +154,7 @@ function DataMenu() {
         </div>
 
         {error && <p className="mt-4 text-[0.85rem] text-wine-500">{error}</p>}
+        </section>
 
         <p className="mt-6 border-t rule pt-4 text-[0.78rem] text-ink-300">
           {lastSaved

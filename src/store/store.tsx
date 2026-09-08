@@ -93,6 +93,8 @@ function load(): AppState {
 interface StoreValue {
   state: AppState;
   update: (fn: (draft: AppState) => AppState) => void;
+  /** Ersetzt den gesamten Zustand — für Import und Geräteabgleich. */
+  replaceState: (next: AppState) => void;
   /** Tageseintrag, immer vorhanden. */
   day: (date: DateISO) => DayEntry;
   patchDay: (date: DateISO, patch: Partial<DayEntry>) => void;
@@ -117,7 +119,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const timer = window.setTimeout(() => {
       try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        // updatedAt gehört zum Speicherstand, nicht in den React-Zustand:
+        // sonst löste jedes Speichern die nächste Änderung aus.
+        const stamped = { ...state, updatedAt: new Date().toISOString() };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped));
         setLastSaved(new Date());
       } catch {
         /* Speicher voll oder gesperrt — die App bleibt trotzdem benutzbar. */
@@ -169,6 +174,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [state]);
 
+  const replaceState = useCallback((next: AppState) => {
+    setState(migrate(next));
+  }, []);
+
   const importJSON = useCallback(async (file: File) => {
     const text = await file.text();
     const parsed = JSON.parse(text);
@@ -190,6 +199,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => ({
       state,
       update,
+      replaceState,
       day,
       patchDay,
       exportJSON,
@@ -198,7 +208,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toggleTheme,
       lastSaved,
     }),
-    [state, update, day, patchDay, exportJSON, importJSON, reset, toggleTheme, lastSaved],
+    [
+      state,
+      update,
+      replaceState,
+      day,
+      patchDay,
+      exportJSON,
+      importJSON,
+      reset,
+      toggleTheme,
+      lastSaved,
+    ],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

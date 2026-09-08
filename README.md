@@ -101,6 +101,33 @@ weiter einzustellen, `BASE_PATH` bleibt leer.
 
 Beide Ziele können parallel laufen; sie stören einander nicht.
 
+## Geräte abgleichen
+
+Ohne Einrichtung speichert die App nur lokal — Mac und iPhone bleiben
+getrennt. Für den Abgleich läuft auf Vercel eine kleine Funktion
+(`api/sync.ts`) über einen **Vercel-Blob-Speicher**.
+
+**Einmalig einrichten** — im Vercel-Dashboard des Projekts: *Storage →
+Create Database → Blob*, anlegen und mit dem Projekt verbinden. Vercel legt
+`BLOB_READ_WRITE_TOKEN` selbst als Umgebungsvariable an; danach einmal neu
+deployen. Mehr ist nicht nötig.
+
+**Benutzen** — unter *Daten & Sicherung → Geräte abgleichen* auf dem ersten
+Gerät einen Sync-Schlüssel erzeugen und hochladen, ihn auf dem zweiten Gerät
+eintragen und herunterladen.
+
+**Sicherheit** — der gesamte Zustand wird im Browser mit AES-GCM
+verschlüsselt; der Schlüssel wird per HKDF aus deinem Sync-Schlüssel
+abgeleitet und verlässt das Gerät nie. Zum Server geht nur eine SHA-256-
+Kennung (wohin) und der Geheimtext (was). Wer den Speicher liest, sieht
+nichts Verwertbares. Wer den Sync-Schlüssel hat, sieht alles — er ist ein
+Passwort, und er ist nicht wiederherstellbar.
+
+Der Abgleich läuft bewusst über zwei sichtbare Knöpfe statt im Hintergrund:
+bei zwei Geräten gewinnt sonst irgendwann der letzte Schreibvorgang, ohne
+dass jemand es merkt. Auf GitHub Pages gibt es keine Serverfunktionen — dort
+bleibt es beim Datei-Backup.
+
 ## Aufbau
 
 ```

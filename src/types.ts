@@ -349,6 +349,8 @@ export interface Finances {
 export interface AppState {
   version: number;
   createdAt: DateTimeISO;
+  /** Zeitpunkt der letzten Änderung — entscheidet beim Abgleich, wer gewinnt. */
+  updatedAt?: DateTimeISO;
   theme: 'light' | 'dark';
   compass: Compass;
   season: Season;
