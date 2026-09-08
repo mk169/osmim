@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../store/store';
 import { newId } from '../store/actions';
 import { EVENT_COLOR, EVENT_KIND, options } from '../lib/labels';
 import type { CalendarEvent, EventKind, WeekReview } from '../types';
 import {
+  AutoTextarea,
   Card,
+  DeleteButton,
   Empty,
   InlineEdit,
   Modal,
@@ -50,81 +52,170 @@ function CapacityMark({ count }: { count: number }) {
   );
 }
 
-function EventForm({
+/**
+ * Ein Formular für neue und bestehende Termine. `event` leer heißt: neu
+ * anlegen am übergebenen Datum.
+ */
+function EventModal({
+  open,
   date,
-  onDone,
+  event,
+  onClose,
 }: {
+  open: boolean;
   date: string;
-  onDone: () => void;
+  event?: CalendarEvent;
+  onClose: () => void;
 }) {
   const { update } = useStore();
-  const [title, setTitle] = useState('');
-  const [kind, setKind] = useState<EventKind>('study');
-  const [start, setStart] = useState('');
-  const [demanding, setDemanding] = useState(false);
+  const [draft, setDraft] = useState<Omit<CalendarEvent, 'id'>>(() => ({
+    title: '',
+    kind: 'study',
+    date,
+    start: '',
+    end: '',
+    note: '',
+    demanding: false,
+  }));
+
+  // Beim Öffnen den Entwurf frisch aus dem Termin befüllen.
+  useEffect(() => {
+    if (!open) return;
+    setDraft(
+      event
+        ? { ...event }
+        : {
+            title: '',
+            kind: 'study',
+            date,
+            start: '',
+            end: '',
+            note: '',
+            demanding: false,
+          },
+    );
+  }, [open, event, date]);
+
+  const save = () => {
+    const title = draft.title.trim();
+    if (!title) return;
+    const clean: Omit<CalendarEvent, 'id'> = {
+      ...draft,
+      title,
+      start: draft.start || undefined,
+      end: draft.end || undefined,
+      note: draft.note?.trim() || undefined,
+    };
+    update((s) =>
+      event
+        ? {
+            ...s,
+            events: s.events.map((e) => (e.id === event.id ? { ...e, ...clean } : e)),
+          }
+        : { ...s, events: [...s.events, { id: newId('ev'), ...clean }] },
+    );
+    onClose();
+  };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!title.trim()) return;
-        update((s) => ({
-          ...s,
-          events: [
-            ...s.events,
-            {
-              id: newId('ev'),
-              title: title.trim(),
-              kind,
-              date,
-              start: start || undefined,
-              demanding,
-            },
-          ],
-        }));
-        onDone();
-      }}
-      className="space-y-4"
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={event ? 'Termin bearbeiten' : `Neuer Termin · ${formatShort(date)}`}
     >
-      <TextField
-        label="Was"
-        value={title}
-        autoFocus
-        placeholder="Fokusblock, Training, Abendessen …"
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Select
-          label="Art"
-          value={kind}
-          onChange={(v) => setKind(v as EventKind)}
-          options={options(EVENT_KIND)}
-        />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          save();
+        }}
+        className="space-y-4"
+      >
         <TextField
-          label="Uhrzeit"
-          type="time"
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
+          label="Was"
+          value={draft.title}
+          autoFocus
+          placeholder="Fokusblock, Training, Abendessen …"
+          onChange={(e) => setDraft({ ...draft, title: e.target.value })}
         />
-      </div>
-      <label className="flex cursor-pointer items-center gap-3 text-[0.9rem] text-ink-500 dark:text-paper-200/75">
-        <input
-          type="checkbox"
-          checked={demanding}
-          onChange={(e) => setDemanding(e.target.checked)}
-          className="h-3.5 w-3.5 accent-forest-500"
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Select
+            label="Art"
+            value={draft.kind}
+            onChange={(v) => setDraft({ ...draft, kind: v as EventKind })}
+            options={options(EVENT_KIND)}
+          />
+          <TextField
+            label="Tag"
+            type="date"
+            value={draft.date}
+            onChange={(e) => setDraft({ ...draft, date: e.target.value })}
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TextField
+            label="Von"
+            type="time"
+            value={draft.start ?? ''}
+            onChange={(e) => setDraft({ ...draft, start: e.target.value })}
+          />
+          <TextField
+            label="Bis"
+            type="time"
+            value={draft.end ?? ''}
+            onChange={(e) => setDraft({ ...draft, end: e.target.value })}
+          />
+        </div>
+
+        <AutoTextarea
+          label="Notiz"
+          value={draft.note ?? ''}
+          placeholder="Optional — Ort, Mitbringsel, Gedanke."
+          onChange={(e) => setDraft({ ...draft, note: e.target.value })}
         />
-        Anspruchsvolle Priorität (zählt in die Kapazität)
-      </label>
-      <div className="flex justify-end gap-2 border-t rule pt-4">
-        <button type="button" onClick={onDone} className="btn-quiet">
-          Abbrechen
-        </button>
-        <button type="submit" className="btn-solid" disabled={!title.trim()}>
-          Eintragen
-        </button>
-      </div>
-    </form>
+
+        <label className="flex cursor-pointer items-start gap-3 text-[0.9rem] leading-snug text-ink-500 dark:text-paper-200/75">
+          <input
+            type="checkbox"
+            checked={draft.demanding ?? false}
+            onChange={(e) => setDraft({ ...draft, demanding: e.target.checked })}
+            className="mt-0.5 h-3.5 w-3.5 accent-forest-500"
+          />
+          <span>
+            Anspruchsvolle Priorität
+            <span className="block text-[0.8rem] text-ink-300 dark:text-paper-200/45">
+              Zählt in die Kapazität — höchstens drei pro Tag.
+            </span>
+          </span>
+        </label>
+
+        <div className="flex items-center justify-between border-t rule pt-4">
+          {event ? (
+            <button
+              type="button"
+              onClick={() => {
+                update((s) => ({ ...s, events: s.events.filter((e) => e.id !== event.id) }));
+                onClose();
+              }}
+              className="text-[0.8rem] text-ink-300 underline-offset-2 hover:text-wine-500 hover:underline"
+            >
+              Termin löschen
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-2">
+            <button type="button" onClick={onClose} className="btn-quiet">
+              Abbrechen
+            </button>
+            <button type="submit" className="btn-solid" disabled={!draft.title.trim()}>
+              {event ? 'Sichern' : 'Eintragen'}
+            </button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
@@ -132,6 +223,7 @@ function DayColumn({ date }: { date: string }) {
   const { state } = useStore();
   const isToday = date === today();
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<CalendarEvent | null>(null);
 
   const events = state.events
     .filter((e) => e.date === date)
@@ -167,7 +259,7 @@ function DayColumn({ date }: { date: string }) {
 
       <div className="flex-1 space-y-1.5">
         {events.map((e) => (
-          <EventChip key={e.id} event={e} />
+          <EventChip key={e.id} event={e} onEdit={() => setEditing(e)} />
         ))}
         {tasks.map((t) => (
           <p
@@ -202,38 +294,55 @@ function DayColumn({ date }: { date: string }) {
         </button>
       </footer>
 
-      <Modal open={adding} onClose={() => setAdding(false)} title={`Eintrag · ${formatShort(date)}`}>
-        <EventForm date={date} onDone={() => setAdding(false)} />
-      </Modal>
+      <EventModal open={adding} date={date} onClose={() => setAdding(false)} />
+      <EventModal
+        open={editing !== null}
+        date={date}
+        event={editing ?? undefined}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 }
 
-function EventChip({ event }: { event: CalendarEvent }) {
+function EventChip({
+  event,
+  onEdit,
+}: {
+  event: CalendarEvent;
+  onEdit: () => void;
+}) {
   const { update } = useStore();
+  const time = [event.start, event.end].filter(Boolean).join('–');
+
   return (
     <div
       className={cx(
-        'group relative rounded-[3px] border-l-2 bg-paper-100/70 py-1 pl-2 pr-5 dark:bg-ink-900/40',
+        'group relative rounded-[3px] border-l-2 bg-paper-100/70 dark:bg-ink-900/40',
         EVENT_COLOR[event.kind],
       )}
     >
-      <p className="text-[0.8rem] leading-snug text-ink-600 dark:text-paper-200/85">
-        {event.title}
-      </p>
-      <p className="text-[0.7rem] text-ink-300 dark:text-paper-200/45">
-        {[event.start, EVENT_KIND[event.kind]].filter(Boolean).join(' · ')}
-      </p>
       <button
         type="button"
-        aria-label="Eintrag entfernen"
-        onClick={() =>
+        onClick={onEdit}
+        title="Bearbeiten"
+        className="block w-full py-1 pl-2 pr-6 text-left"
+      >
+        <span className="block text-[0.8rem] leading-snug text-ink-600 dark:text-paper-200/85">
+          {event.title}
+        </span>
+        <span className="block text-[0.7rem] text-ink-300 dark:text-paper-200/45">
+          {[time, EVENT_KIND[event.kind]].filter(Boolean).join(' · ')}
+          {event.demanding && ' · anspruchsvoll'}
+        </span>
+      </button>
+      <DeleteButton
+        label="Termin entfernen"
+        className="absolute right-0.5 top-0.5"
+        onDelete={() =>
           update((s) => ({ ...s, events: s.events.filter((e) => e.id !== event.id) }))
         }
-        className="absolute right-1 top-1 text-[0.7rem] text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-      >
-        ×
-      </button>
+      />
     </div>
   );
 }

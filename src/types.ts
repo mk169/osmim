@@ -48,6 +48,9 @@ export interface Area {
 export type GoalHorizon = 'season' | 'year' | 'horizon';
 export type GoalStatus = 'open' | 'moving' | 'done' | 'resting';
 
+/** Optionaler Denkrahmen für ein Ziel. 'none' lässt das Ziel schlicht. */
+export type GoalFramework = 'none' | 'smart' | 'okr' | 'woop';
+
 export interface Goal {
   id: ID;
   title: string;
@@ -57,7 +60,23 @@ export interface Goal {
   status: GoalStatus;
   /** 0–100, bewusst grob und ohne Punktesystem. */
   progress: number;
+  framework?: GoalFramework;
+  /**
+   * Antworten auf die Felder des gewählten Rahmens, nach Feldschlüssel.
+   * Generisch gehalten, damit ein neuer Rahmen kein Datenmodell braucht.
+   */
+  fields?: Record<string, string>;
   createdAt: DateTimeISO;
+}
+
+/**
+ * Die 25/5-Übung: bis zu 25 Ziele aufschreiben, fünf auswählen —
+ * die übrigen zwanzig sind bewusst zu meiden, nicht „später".
+ */
+export interface FocusItem {
+  id: ID;
+  text: string;
+  chosen: boolean;
 }
 
 export type ProjectStatus = 'idea' | 'exploring' | 'active' | 'paused' | 'done';
@@ -332,4 +351,6 @@ export interface AppState {
   lived: LivedMoment[];
   finances: Finances;
   weekFocus: Record<DateISO, string>;
+  /** 25/5-Liste: alles aufschreiben, fünf wählen, den Rest meiden. */
+  focusList: FocusItem[];
 }

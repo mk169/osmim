@@ -21,13 +21,35 @@ npm run preview  # Build lokal ansehen
 | # | Seite | Zustand |
 |---|-------|---------|
 | 1 | **Heute** | voll funktionsfähig — Intention, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist, max. drei Aufgaben), Attention-Check, Mini-Journal, Tagesabschluss |
-| 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, Anti-Vision, Fünf-Jahres-Phasen, „Nicht mein Maßstab“ — alles editierbar |
-| 3 | **Saison** | voll funktionsfähig — Saisonziele mit ruhiger Fortschrittslinie, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
+| 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, die 25/5-Liste, Anti-Vision, Fünf-Jahres-Phasen, „Nicht mein Maßstab“ — alles editierbar |
+| 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (30 Tage bis ein Jahr oder eigene Daten), Ziele mit optionalem Denkrahmen, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
 | 4 | **Bereiche** | voll funktionsfähig — neun Lebensbereiche mit Leitbild, 90-Tage-Fokus, Zielen, Gewohnheiten, Projekten, Notizen und Rückblick; dazu bereichseigene Ansichten (Klausuren, Praktikums-Pipeline, Trainingstagebuch, Kontakte, Glaubenspraxis, Sprachen & Bibliothek, Finanzen, Krakau) |
 | 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, Projekte mit Warum/Ergebnis/nächster physischer Handlung/Bewertung, Grenze von fünf aktiven Projekten |
-| 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender, Kapazitätsanzeige (max. drei anspruchsvolle Prioritäten pro Tag), Wochenreview mit fünf Fragen |
+| 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender mit anklickbaren, bearbeitbaren Terminen (Von/Bis, Notiz), Kapazitätsanzeige (max. drei anspruchsvolle Prioritäten pro Tag), Wochenreview mit fünf Fragen |
 | 7 | **Journal** | Vorlagen (Tages-Check-in, Wochenreview, Gebet, Ideen, emotionale Klärung), Volltextsuche, Tags, dezente Energie-/Stimmungsskala |
 | 8 | **Archiv** | abgeschlossene Projekte, frühere Wochen- und Monatsrückblicke, Bibliothek, „Leben erlebt“ |
+
+## Ziele und Denkrahmen
+
+Ein Ziel ist zunächst nur ein Satz. Wer mehr Struktur will, wählt beim Anklicken
+einen Rahmen — die zusätzlichen Felder erscheinen erst dann:
+
+- **SMART** — spezifisch, messbar, erreichbar, relevant, terminiert
+- **OKR** — ein Objective, drei Key Results
+- **WOOP** — Wunsch, Ergebnis, inneres Hindernis, Wenn-Dann-Plan
+
+Dazu die **25/5-Liste** im Kompass: fünfundzwanzig Ziele aufschreiben, fünf
+wählen — die übrigen zwanzig werden nicht zur Warteschlange, sondern zur
+Vermeidungsliste.
+
+## Löschen
+
+Alles, was in einer Karte oder Liste steht, lässt sich dort auch entfernen:
+Ziele, Aufgaben, Projekte, Gewohnheiten, Klausuren, Bewerbungen, Kontakte,
+Termine, Journaleinträge, Rückblicke, Bibliothekseinträge, Finanzposten,
+Werte und Phasen. Das Kreuz erscheint beim Überfahren der Zeile (auf
+Touch-Geräten dauerhaft); nur wo echte Arbeit verloren geht, kommt eine
+Rückfrage.
 
 ## Daten
 

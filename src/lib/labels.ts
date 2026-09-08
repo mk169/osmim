@@ -1,5 +1,6 @@
 import type {
   ApplicationStatus,
+  GoalFramework,
   ContactCircle,
   EventKind,
   ExamStatus,
@@ -134,3 +135,59 @@ export const JOURNAL_TAGS = [
 export function options<T extends string>(map: Record<T, string>) {
   return (Object.keys(map) as T[]).map((value) => ({ value, label: map[value] }));
 }
+
+/* ----------------------------------------------------------- Zielrahmen */
+
+export interface FrameworkField {
+  key: string;
+  label: string;
+  hint: string;
+}
+
+export interface FrameworkDef {
+  label: string;
+  /** Ein Satz, was der Rahmen leistet — und wofür er nicht taugt. */
+  blurb: string;
+  fields: FrameworkField[];
+}
+
+export const GOAL_FRAMEWORK: Record<GoalFramework, FrameworkDef> = {
+  none: {
+    label: 'Kein Rahmen',
+    blurb: 'Ein Ziel darf auch einfach ein Satz sein.',
+    fields: [],
+  },
+  smart: {
+    label: 'SMART',
+    blurb: 'Macht ein vages Vorhaben überprüfbar. Gut für Handfestes, schlecht für Haltungen.',
+    fields: [
+      { key: 'specific', label: 'Spezifisch', hint: 'Was genau — so konkret, dass ein Fremder es verstünde.' },
+      { key: 'measurable', label: 'Messbar', hint: 'Woran erkenne ich, dass es erreicht ist?' },
+      { key: 'attainable', label: 'Erreichbar', hint: 'Ist das mit meiner echten Zeit machbar?' },
+      { key: 'relevant', label: 'Relevant', hint: 'Warum lohnt es sich — welchem Wert dient es?' },
+      { key: 'timed', label: 'Terminiert', hint: 'Bis wann?' },
+    ],
+  },
+  okr: {
+    label: 'OKR',
+    blurb: 'Ein Ziel, drei Ergebnisse. Trennt, was man will, von dem, woran man es merkt.',
+    fields: [
+      { key: 'objective', label: 'Objective', hint: 'Der Zustand, den ich will — qualitativ, ruhig formuliert.' },
+      { key: 'kr1', label: 'Key Result 1', hint: 'Ein beobachtbares Ergebnis.' },
+      { key: 'kr2', label: 'Key Result 2', hint: 'Noch eines.' },
+      { key: 'kr3', label: 'Key Result 3', hint: 'Und ein drittes — mehr braucht es nicht.' },
+    ],
+  },
+  woop: {
+    label: 'WOOP',
+    blurb: 'Nimmt das Hindernis vorweg, statt es zu verdrängen. Stark bei Gewohnheiten.',
+    fields: [
+      { key: 'wish', label: 'Wish — Wunsch', hint: 'Was möchte ich?' },
+      { key: 'outcome', label: 'Outcome — bestes Ergebnis', hint: 'Wie fühlt es sich an, wenn es gelingt?' },
+      { key: 'obstacle', label: 'Obstacle — inneres Hindernis', hint: 'Was in mir steht im Weg? Ehrlich.' },
+      { key: 'plan', label: 'Plan — Wenn/Dann', hint: 'Wenn <Hindernis>, dann <Handlung>.' },
+    ],
+  },
+};
+
+export const GOAL_FRAMEWORK_ORDER: GoalFramework[] = ['none', 'smart', 'okr', 'woop'];

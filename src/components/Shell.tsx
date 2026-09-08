@@ -7,7 +7,7 @@ import { formatShort, today } from '../lib/date';
 const NAV: { route: Route; label: string; hint: string }[] = [
   { route: 'heute', label: 'Heute', hint: 'Der Tag, klein gehalten' },
   { route: 'kompass', label: 'Kompass', hint: 'Identität und Richtung' },
-  { route: 'saison', label: 'Saison', hint: 'Die nächsten 90 Tage' },
+  { route: 'saison', label: 'Saison', hint: 'Zeitraum und Ziele' },
   { route: 'bereiche', label: 'Bereiche', hint: 'Neun Lebensbereiche' },
   { route: 'projekte', label: 'Projekte', hint: 'Inbox und Vorhaben' },
   { route: 'woche', label: 'Woche', hint: 'Kalender und Review' },

@@ -16,6 +16,7 @@ import { INBOX_KIND, PROJECT_STATUS, PROJECT_STATUS_ORDER, options } from '../li
 import {
   AutoTextarea,
   Card,
+  DeleteButton,
   Empty,
   InlineEdit,
   Modal,
@@ -46,13 +47,19 @@ function InboxRow({ item }: { item: InboxItem }) {
             <Pill tone="muted">{INBOX_KIND[item.kind]}</Pill>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setSorting((v) => !v)}
-          className="shrink-0 text-[0.78rem] text-ink-300 underline-offset-2 hover:text-ink-500 hover:underline dark:hover:text-paper-100"
-        >
-          {sorting ? 'schließen' : 'sortieren'}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSorting((v) => !v)}
+            className="text-[0.78rem] text-ink-300 underline-offset-2 hover:text-ink-500 hover:underline dark:hover:text-paper-100"
+          >
+            {sorting ? 'schließen' : 'sortieren'}
+          </button>
+          <DeleteButton
+            label="Aus der Inbox löschen"
+            onDelete={() => update((s) => removeInbox(s, item.id))}
+          />
+        </div>
       </div>
 
       {sorting && (
@@ -259,7 +266,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
   return (
     <li
       className={cx(
-        'card p-5 transition-colors duration-300 ease-calm sm:p-6',
+        'card group p-5 transition-colors duration-300 ease-calm sm:p-6',
         project.status === 'active' && 'border-l-2 border-l-forest-500 dark:border-l-forest-300',
         project.status === 'paused' && 'opacity-70',
       )}
@@ -284,6 +291,11 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
             }
             options={options(PROJECT_STATUS)}
             className="w-36 py-1 text-[0.78rem]"
+          />
+          <DeleteButton
+            label={`Projekt „${project.title}“ löschen`}
+            confirm={`„${project.title}“ löschen?`}
+            onDelete={() => update((s) => removeProject(s, project.id))}
           />
         </div>
       </div>

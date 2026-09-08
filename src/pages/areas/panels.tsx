@@ -16,6 +16,7 @@ import type {
 } from '../../types';
 import {
   Card,
+  DeleteButton,
   Empty,
   InlineEdit,
   Pill,
@@ -46,7 +47,7 @@ export function ExamPanel() {
           {exams.map((ex) => {
             const days = ex.date ? daysBetween(t, ex.date) : null;
             return (
-              <li key={ex.id} className="py-4 first:pt-0">
+              <li key={ex.id} className="group py-4 first:pt-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h4 className="display text-[1.05rem] text-ink-700 dark:text-paper-100">
                     {ex.title}
@@ -65,6 +66,15 @@ export function ExamPanel() {
                       }
                       options={options(EXAM_STATUS)}
                       className="w-36 py-1 text-[0.78rem]"
+                    />
+                    <DeleteButton
+                      label={`Klausur „${ex.title}“ entfernen`}
+                      onDelete={() =>
+                        update((s) => ({
+                          ...s,
+                          exams: s.exams.filter((e) => e.id !== ex.id),
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -143,9 +153,9 @@ export function ApplicationPanel() {
       ) : (
         <ul className="divide-y rule">
           {state.applications.map((a) => (
-            <li key={a.id} className="py-4 first:pt-0">
+            <li key={a.id} className="group py-4 first:pt-0">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <h4 className="text-[0.98rem] text-ink-700 dark:text-paper-100">{a.company}</h4>
                   <p className="text-[0.85rem] text-ink-400 dark:text-paper-200/60">{a.role}</p>
                 </div>
@@ -161,6 +171,15 @@ export function ApplicationPanel() {
                   }
                   options={options(APPLICATION_STATUS)}
                   className="w-40 py-1 text-[0.78rem]"
+                />
+                <DeleteButton
+                  label={`${a.company} entfernen`}
+                  onDelete={() =>
+                    update((s) => ({
+                      ...s,
+                      applications: s.applications.filter((x) => x.id !== a.id),
+                    }))
+                  }
                 />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.8rem] text-ink-300 dark:text-paper-200/45">
@@ -261,7 +280,7 @@ export function ContactPanel() {
           {shown.map((c) => {
             const since = c.lastMet ? -daysBetween(t, c.lastMet) : null;
             return (
-              <li key={c.id} className="py-4 first:pt-0">
+              <li key={c.id} className="group py-4 first:pt-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h4 className="text-[0.98rem] text-ink-700 dark:text-paper-100">{c.name}</h4>
                   <div className="flex items-center gap-2">
@@ -280,6 +299,15 @@ export function ContactPanel() {
                           ? 'heute gesehen'
                           : `vor ${since} Tagen`}
                     </span>
+                    <DeleteButton
+                      label={`${c.name} entfernen`}
+                      onDelete={() =>
+                        update((s) => ({
+                          ...s,
+                          contacts: s.contacts.filter((x) => x.id !== c.id),
+                        }))
+                      }
+                    />
                   </div>
                 </div>
                 <div className="-mx-2 mt-1">
@@ -391,16 +419,12 @@ export function LibraryPanel({ compact }: { compact?: boolean }) {
                   </span>
                 )}
               </span>
-              <button
-                type="button"
-                aria-label="Eintrag entfernen"
-                onClick={() =>
+              <DeleteButton
+                label="Eintrag entfernen"
+                onDelete={() =>
                   update((s) => ({ ...s, library: s.library.filter((x) => x.id !== it.id) }))
                 }
-                className="shrink-0 text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-              >
-                ×
-              </button>
+              />
             </li>
           ))}
         </ul>
@@ -503,9 +527,21 @@ export function FinancePanel() {
           <p className="label mb-2">Einnahmen</p>
           <ul className="space-y-1 text-[0.88rem] text-ink-400 dark:text-paper-200/60">
             {f.income.map((i) => (
-              <li key={i.id} className="flex justify-between gap-3">
-                <span>{i.label}</span>
+              <li key={i.id} className="group flex items-center justify-between gap-2">
+                <span className="min-w-0 flex-1 truncate">{i.label}</span>
                 <span className="tabular-nums">{euro(i.amount)}</span>
+                <DeleteButton
+                  label={`${i.label} entfernen`}
+                  onDelete={() =>
+                    update((s) => ({
+                      ...s,
+                      finances: {
+                        ...s.finances,
+                        income: s.finances.income.filter((x) => x.id !== i.id),
+                      },
+                    }))
+                  }
+                />
               </li>
             ))}
           </ul>
@@ -514,9 +550,21 @@ export function FinancePanel() {
           <p className="label mb-2">Fixkosten</p>
           <ul className="space-y-1 text-[0.88rem] text-ink-400 dark:text-paper-200/60">
             {f.fixed.map((i) => (
-              <li key={i.id} className="flex justify-between gap-3">
-                <span>{i.label}</span>
+              <li key={i.id} className="group flex items-center justify-between gap-2">
+                <span className="min-w-0 flex-1 truncate">{i.label}</span>
                 <span className="tabular-nums">{euro(i.amount)}</span>
+                <DeleteButton
+                  label={`${i.label} entfernen`}
+                  onDelete={() =>
+                    update((s) => ({
+                      ...s,
+                      finances: {
+                        ...s.finances,
+                        fixed: s.finances.fixed.filter((x) => x.id !== i.id),
+                      },
+                    }))
+                  }
+                />
               </li>
             ))}
           </ul>
@@ -749,7 +797,7 @@ export function FaithPanel() {
         {habits.map((h) => {
           const done = h.log.includes(t);
           return (
-            <li key={h.id} className="flex items-center justify-between gap-4 py-1.5">
+            <li key={h.id} className="group flex items-center justify-between gap-4 py-1.5">
               <span className="text-[0.94rem] text-ink-600 dark:text-paper-200/85">{h.title}</span>
               <button
                 type="button"

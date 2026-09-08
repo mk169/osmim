@@ -607,6 +607,8 @@ export function createSeedState(): AppState {
       ],
     },
 
+    focusList: [],
+
     weekFocus: {
       [week]: 'Die Thesis-Gliederung steht — alles andere darf diese Woche mittelmäßig sein.',
     },

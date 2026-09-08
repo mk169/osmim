@@ -5,6 +5,7 @@ import { JOURNAL_BODY, JOURNAL_TAGS, JOURNAL_TEMPLATE } from '../lib/labels';
 import type { JournalEntry, JournalTemplate } from '../types';
 import {
   AutoTextarea,
+  DeleteButton,
   Empty,
   Gauge,
   Modal,
@@ -211,13 +212,21 @@ export function Journal() {
       ) : (
         <ul className="space-y-3">
           {entries.map((j) => (
-            <li key={j.id}>
+            <li key={j.id} className="card group relative p-5 transition-all duration-300 ease-calm hover:-translate-y-px sm:p-6">
+              <DeleteButton
+                label="Eintrag löschen"
+                confirm="Diesen Eintrag löschen?"
+                className="absolute right-3 top-3 z-10"
+                onDelete={() =>
+                  update((s) => ({ ...s, journal: s.journal.filter((x) => x.id !== j.id) }))
+                }
+              />
               <button
                 type="button"
                 onClick={() => setOpenId(j.id)}
-                className="card block w-full p-5 text-left transition-all duration-300 ease-calm hover:-translate-y-px sm:p-6"
+                className="block w-full text-left"
               >
-                <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
+                <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3 pr-6">
                   <h3 className="display text-lg text-ink-700 dark:text-paper-100">
                     {j.title || 'Ohne Titel'}
                   </h3>

@@ -5,6 +5,7 @@ import { LIBRARY_KIND, options } from '../lib/labels';
 import type { LibraryKind, LivedMoment } from '../types';
 import {
   Card,
+  DeleteButton,
   Empty,
   PageHeader,
   Pill,
@@ -76,14 +77,26 @@ export function Archive() {
         ) : (
           <ul className="space-y-3">
             {doneProjects.map((p) => (
-              <li key={p.id} className="card p-5">
+              <li key={p.id} className="card group p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="display text-lg text-ink-700 dark:text-paper-100">{p.title}</h3>
-                  {p.archivedAt && (
-                    <span className="text-[0.76rem] text-ink-300">
-                      {formatShort(p.archivedAt.slice(0, 10))}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {p.archivedAt && (
+                      <span className="text-[0.76rem] text-ink-300">
+                        {formatShort(p.archivedAt.slice(0, 10))}
+                      </span>
+                    )}
+                    <DeleteButton
+                      label={`„${p.title}“ endgültig löschen`}
+                      confirm={`„${p.title}“ endgültig aus dem Archiv löschen?`}
+                      onDelete={() =>
+                        update((s) => ({
+                          ...s,
+                          projects: s.projects.filter((x) => x.id !== p.id),
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
                 {p.outcome && (
                   <p className="mt-1 text-[0.9rem] text-ink-400 dark:text-paper-200/60">
@@ -109,8 +122,20 @@ export function Archive() {
                 {[...state.weekReviews]
                   .sort((a, b) => b.weekStart.localeCompare(a.weekStart))
                   .map((r) => (
-                    <li key={r.id} className="card p-5">
-                      <p className="label mb-3">Woche ab {formatShort(r.weekStart)}</p>
+                    <li key={r.id} className="card group p-5">
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <p className="label">Woche ab {formatShort(r.weekStart)}</p>
+                        <DeleteButton
+                          label="Rückblick entfernen"
+                          confirm="Diesen Wochenrückblick löschen?"
+                          onDelete={() =>
+                            update((s) => ({
+                              ...s,
+                              weekReviews: s.weekReviews.filter((x) => x.id !== r.id),
+                            }))
+                          }
+                        />
+                      </div>
                       <dl className="space-y-2 text-[0.9rem]">
                         {[
                           ['Beendet', r.finished],
@@ -147,8 +172,22 @@ export function Archive() {
                 {[...state.monthReflections]
                   .sort((a, b) => b.month.localeCompare(a.month))
                   .map((m) => (
-                    <li key={m.id} className="card p-5">
-                      <p className="label mb-2">{monthLabel(m.month)}</p>
+                    <li key={m.id} className="card group p-5">
+                      <div className="mb-2 flex items-start justify-between gap-3">
+                        <p className="label">{monthLabel(m.month)}</p>
+                        <DeleteButton
+                          label="Reflexion entfernen"
+                          confirm="Diese Monatsreflexion löschen?"
+                          onDelete={() =>
+                            update((s) => ({
+                              ...s,
+                              monthReflections: s.monthReflections.filter(
+                                (x) => x.id !== m.id,
+                              ),
+                            }))
+                          }
+                        />
+                      </div>
                       <p className="prose-note">{m.text}</p>
                     </li>
                   ))}
@@ -196,19 +235,15 @@ export function Archive() {
                 <Card key={it.id} as="article" className="group">
                   <div className="mb-2 flex items-start justify-between gap-3">
                     <Pill tone="muted">{LIBRARY_KIND[it.kind]}</Pill>
-                    <button
-                      type="button"
-                      aria-label="Entfernen"
-                      onClick={() =>
+                    <DeleteButton
+                      label="Eintrag entfernen"
+                      onDelete={() =>
                         update((s) => ({
                           ...s,
                           library: s.library.filter((x) => x.id !== it.id),
                         }))
                       }
-                      className="text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    />
                   </div>
                   <p className="display text-[1.05rem] leading-snug text-ink-700 dark:text-paper-100">
                     {it.title}
@@ -295,16 +330,12 @@ export function Archive() {
                         </span>
                       )}
                     </span>
-                    <button
-                      type="button"
-                      aria-label="Entfernen"
-                      onClick={() =>
+                    <DeleteButton
+                      label="Eintrag entfernen"
+                      onDelete={() =>
                         update((s) => ({ ...s, lived: s.lived.filter((x) => x.id !== l.id) }))
                       }
-                      className="shrink-0 text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    />
                   </li>
                 ))}
             </ul>

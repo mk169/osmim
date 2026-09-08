@@ -15,6 +15,7 @@ import { LANE } from '../lib/labels';
 import {
   Card,
   Checkbox,
+  DeleteButton,
   Empty,
   InlineEdit,
   Modal,
@@ -66,22 +67,11 @@ function LaneCard({ lane, date }: { lane: TaskLane; date: string }) {
               label={t.title}
               hint={t.note}
             />
-            <button
-              type="button"
-              aria-label="Vom Tag nehmen"
-              onClick={() => update((s) => removeTask(s, t.id))}
-              className="absolute right-1 top-2 rounded p-1 text-ink-300 opacity-0 transition-opacity duration-200 hover:text-wine-500 focus-visible:opacity-100 group-hover:opacity-100"
-            >
-              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5">
-                <path
-                  d="M4 4l8 8M12 4l-8 8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
+            <DeleteButton
+              label="Vom Tag nehmen"
+              className="absolute right-1 top-2"
+              onDelete={() => update((s) => removeTask(s, t.id))}
+            />
           </div>
         ))}
       </div>
@@ -326,8 +316,8 @@ export function Today() {
           <ul className="space-y-2.5">
             {dayEvents.map((e) => (
               <li key={e.id} className="flex items-baseline gap-4 text-[0.92rem]">
-                <span className="w-20 shrink-0 tabular-nums text-ink-300 dark:text-paper-200/45">
-                  {e.start ?? '—'}
+                <span className="w-24 shrink-0 tabular-nums text-ink-300 dark:text-paper-200/45">
+                  {[e.start, e.end].filter(Boolean).join('–') || '—'}
                 </span>
                 <span className="text-ink-600 dark:text-paper-200/85">{e.title}</span>
               </li>

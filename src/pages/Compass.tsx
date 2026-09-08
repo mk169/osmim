@@ -1,6 +1,8 @@
 import { useStore } from '../store/store';
+import { FocusList } from '../components/FocusList';
 import {
   Card,
+  DeleteButton,
   InlineEdit,
   PageHeader,
   QuickAdd,
@@ -33,14 +35,7 @@ function ListBlock({
               {marker}
             </span>
             <span className="flex-1">{item}</span>
-            <button
-              type="button"
-              aria-label="Entfernen"
-              onClick={() => onRemove(i)}
-              className="shrink-0 text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-            >
-              ×
-            </button>
+            <DeleteButton onDelete={() => onRemove(i)} />
           </li>
         ))}
       </ul>
@@ -83,16 +78,11 @@ export function Compass() {
               className="group flex items-center gap-2 rounded-full border border-paper-300 px-4 py-1.5 text-[0.9rem] text-ink-600 transition-colors duration-300 ease-calm hover:border-forest-300 dark:border-ink-600 dark:text-paper-200/85 dark:hover:border-forest-500"
             >
               {v}
-              <button
-                type="button"
-                aria-label={`${v} entfernen`}
-                onClick={() =>
-                  patch({ values: c.values.filter((_, idx) => idx !== i) })
-                }
-                className="text-ink-300 opacity-0 transition-opacity hover:text-wine-500 group-hover:opacity-100"
-              >
-                ×
-              </button>
+              <DeleteButton
+                label={`${v} entfernen`}
+                onDelete={() => patch({ values: c.values.filter((_, idx) => idx !== i) })}
+                className="-mr-1"
+              />
             </span>
           ))}
         </div>
@@ -118,9 +108,17 @@ export function Compass() {
                 'hover:-translate-y-px hover:border-brass-300 dark:hover:border-brass-500/60',
               )}
             >
-              <h3 className="display mb-2 text-[1.1rem] text-ink-700 dark:text-paper-100">
-                {q.title}
-              </h3>
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <h3 className="display text-[1.1rem] text-ink-700 dark:text-paper-100">
+                  {q.title}
+                </h3>
+                <DeleteButton
+                  label={`${q.title} entfernen`}
+                  onDelete={() =>
+                    patch({ qualities: c.qualities.filter((_, idx) => idx !== i) })
+                  }
+                />
+              </div>
               <InlineEdit
                 value={q.text}
                 onSave={(v) =>
@@ -136,6 +134,18 @@ export function Compass() {
             </article>
           ))}
         </div>
+        <div className="mt-4 max-w-sm">
+          <QuickAdd
+            placeholder="Eine weitere Qualität …"
+            onAdd={(title) =>
+              patch({ qualities: [...c.qualities, { title, text: '' }] })
+            }
+          />
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <FocusList />
       </section>
 
       <section className="mb-12">
@@ -173,9 +183,19 @@ export function Compass() {
                   <span className="mt-1 w-px flex-1 bg-paper-300 dark:bg-ink-600" />
                 )}
               </div>
-              <div className="min-w-0 flex-1 pb-2">
+              <div className="group min-w-0 flex-1 pb-2">
                 <p className="label mb-1">{p.label}</p>
-                <h3 className="display text-xl text-ink-700 dark:text-paper-100">{p.title}</h3>
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="display text-xl text-ink-700 dark:text-paper-100">
+                    {p.title}
+                  </h3>
+                  <DeleteButton
+                    label={`Phase „${p.title}“ entfernen`}
+                    onDelete={() =>
+                      patch({ phases: c.phases.filter((x) => x.id !== p.id) })
+                    }
+                  />
+                </div>
                 <div className="-mx-2 mt-1">
                   <InlineEdit
                     value={p.text}

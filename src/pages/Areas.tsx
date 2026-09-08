@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useStore } from '../store/store';
 import type { Area, AreaKey } from '../types';
-import { GOAL_STATUS, PROJECT_STATUS } from '../lib/labels';
+import { GOAL_FRAMEWORK, GOAL_STATUS, PROJECT_STATUS } from '../lib/labels';
+import { GoalModal } from '../components/GoalModal';
 import {
   Card,
+  DeleteButton,
   Empty,
   InlineEdit,
   PageHeader,
@@ -104,6 +107,7 @@ function AreaOverview() {
 
 function AreaDetail({ id }: { id: AreaKey }) {
   const { state, update } = useStore();
+  const [openGoal, setOpenGoal] = useState<string | null>(null);
   const area = state.areas.find((a) => a.id === id);
   const t = today();
   const week = weekDays(startOfWeek(t));
@@ -200,14 +204,28 @@ function AreaDetail({ id }: { id: AreaKey }) {
         ) : (
           <ul className="space-y-3">
             {goals.map((g) => (
-              <li key={g.id} className="card p-5">
+              <li key={g.id} className="card group p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <p className="min-w-0 flex-1 text-[0.98rem] text-ink-700 dark:text-paper-100">
+                  <button
+                    type="button"
+                    onClick={() => setOpenGoal(g.id)}
+                    className="min-w-0 flex-1 text-left text-[0.98rem] text-ink-700 hover:underline hover:decoration-paper-400 hover:underline-offset-4 dark:text-paper-100"
+                  >
                     {g.title}
-                  </p>
+                  </button>
+                  {(g.framework ?? 'none') !== 'none' && (
+                    <Pill tone="brass">{GOAL_FRAMEWORK[g.framework ?? 'none'].label}</Pill>
+                  )}
                   <Pill tone={g.status === 'done' ? 'forest' : 'neutral'}>
                     {GOAL_STATUS[g.status]}
                   </Pill>
+                  <DeleteButton
+                    label="Ziel entfernen"
+                    confirm={`„${g.title}“ löschen?`}
+                    onDelete={() =>
+                      update((s) => ({ ...s, goals: s.goals.filter((x) => x.id !== g.id) }))
+                    }
+                  />
                 </div>
                 {g.detail && (
                   <p className="mt-1 text-[0.88rem] text-ink-400 dark:text-paper-200/60">
@@ -271,7 +289,7 @@ function AreaDetail({ id }: { id: AreaKey }) {
                 const doneToday = h.log.includes(t);
                 const inWeek = habitCountInWeek(h, week);
                 return (
-                  <li key={h.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                  <li key={h.id} className="group flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                     <div className="min-w-0">
                       <p className="text-[0.94rem] text-ink-600 dark:text-paper-200/85">
                         {h.title}
@@ -282,13 +300,24 @@ function AreaDetail({ id }: { id: AreaKey }) {
                           : `diese Woche ${inWeek} von ${h.weeklyTarget ?? 1}`}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => update((s) => toggleHabit(s, h.id, t))}
-                      className={cx('btn shrink-0', doneToday ? 'btn-solid' : 'btn-quiet')}
-                    >
-                      {doneToday ? 'Heute' : 'Heute'}
-                    </button>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => update((s) => toggleHabit(s, h.id, t))}
+                        className={cx('btn', doneToday ? 'btn-solid' : 'btn-quiet')}
+                      >
+                        Heute
+                      </button>
+                      <DeleteButton
+                        label={`Gewohnheit „${h.title}“ entfernen`}
+                        onDelete={() =>
+                          update((s) => ({
+                            ...s,
+                            habits: s.habits.filter((x) => x.id !== h.id),
+                          }))
+                        }
+                      />
+                    </div>
                   </li>
                 );
               })}
@@ -371,6 +400,8 @@ function AreaDetail({ id }: { id: AreaKey }) {
           />
         </Card>
       </div>
+
+      <GoalModal id={openGoal} onClose={() => setOpenGoal(null)} />
     </div>
   );
 }

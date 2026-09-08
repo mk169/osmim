@@ -67,6 +67,7 @@ export function migrate(raw: unknown): AppState {
     library: parsed.library ?? seed.library,
     lived: parsed.lived ?? seed.lived,
     weekFocus: parsed.weekFocus ?? {},
+    focusList: parsed.focusList ?? [],
   };
 }
 

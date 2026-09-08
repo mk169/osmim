@@ -228,6 +228,52 @@ export function Checkbox({
   );
 }
 
+/**
+ * Einheitliches Löschen. Erscheint beim Überfahren der Zeile — auf
+ * Touch-Geräten dauerhaft, weil es dort kein Hover gibt.
+ */
+export function DeleteButton({
+  onDelete,
+  label = 'Entfernen',
+  confirm,
+  className,
+}: {
+  onDelete: () => void;
+  label?: string;
+  /** Rückfrage für alles, was echte Arbeit vernichtet. */
+  confirm?: string;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (confirm && !window.confirm(confirm)) return;
+        onDelete();
+      }}
+      className={cx(
+        'shrink-0 rounded p-1 leading-none text-ink-300 transition-all duration-200 ease-calm',
+        'hover:text-wine-500 focus-visible:opacity-100 dark:hover:text-wine-300',
+        'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
+        className,
+      )}
+    >
+      <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>
+        <path
+          d="M4 4l8 8M12 4l-8 8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
 /* -------------------------------------------------------------- Eingaben */
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
