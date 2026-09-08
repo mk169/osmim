@@ -1,0 +1,55 @@
+name: Deploy
+
+# Baut Personal OS v2 und veröffentlicht es auf GitHub Pages.
+on:
+  push:
+    branches: [claude/personal-os-v2-3qbcf8, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ein Deployment zur Zeit; laufende Läufe nicht abbrechen.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          # GitHub Pages liefert das Projekt unter /osmim/ aus.
+          BASE_PATH: /osmim/
+
+      # Setzt voraus, dass Pages einmalig aktiviert wurde:
+      # Repo → Settings → Pages → Source: GitHub Actions.
+      # Automatisch geht das nicht — der GITHUB_TOKEN eines Workflows darf
+      # Pages nicht einschalten ("Resource not accessible by integration").
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
