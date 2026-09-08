@@ -86,6 +86,21 @@ Beispieltexte. Alles selbst Angelegte trägt eine Zufallskennung und bleibt
 unberührt. Wer trotzdem ganz von vorn beginnen will: **Daten & Sicherung →
 Auf Ausgangsfassung zurücksetzen**.
 
+## Veröffentlichen
+
+Der Basispfad kommt aus der Umgebungsvariable `BASE_PATH` und ist
+standardmäßig `/` — ein Deploy funktioniert damit ohne Konfiguration.
+
+**Vercel** — Repository unter *Add New… → Project* importieren. Vercel
+erkennt Vite von selbst; `vercel.json` legt Build, Ausgabeordner, das
+Rewrite auf `index.html` und die Cache-Header für `assets/` fest. Nichts
+weiter einzustellen, `BASE_PATH` bleibt leer.
+
+**GitHub Pages** — läuft über `.github/workflows/deploy.yml`. Dort wird
+`BASE_PATH=/osmim/` gesetzt, weil das Projekt unter einem Unterpfad liegt.
+
+Beide Ziele können parallel laufen; sie stören einander nicht.
+
 ## Aufbau
 
 ```

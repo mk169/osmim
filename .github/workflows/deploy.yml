@@ -30,6 +30,9 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          # GitHub Pages liefert das Projekt unter /osmim/ aus.
+          BASE_PATH: /osmim/
 
       # Setzt voraus, dass Pages einmalig aktiviert wurde:
       # Repo → Settings → Pages → Source: GitHub Actions.
