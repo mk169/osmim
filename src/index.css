@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-paper-100 text-ink-700 font-sans antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  .dark body {
+    @apply bg-ink-900 text-paper-200;
+  }
+
+  /* Ruhige, kaum sichtbare Bildlaufleisten. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-paper-300 rounded-full;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-ink-600;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::selection {
+    @apply bg-forest-100 text-ink-800;
+  }
+  .dark ::selection {
+    @apply bg-forest-700 text-paper-100;
+  }
+
+  [type='text'],
+  [type='date'],
+  [type='number'],
+  textarea,
+  select {
+    @apply bg-transparent;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-1 ring-forest-500/60 ring-offset-2 ring-offset-paper-100;
+  }
+  .dark :focus-visible {
+    @apply ring-offset-ink-900;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-paper-300/80 bg-paper-50 transition-colors duration-300 ease-calm;
+  }
+  .dark .card {
+    @apply border-ink-600/70 bg-ink-800;
+  }
+
+  .field {
+    @apply w-full rounded-card border border-transparent bg-paper-100/70 px-3 py-2 text-[0.95rem]
+      text-ink-700 placeholder:text-ink-300 transition-colors duration-200 ease-calm
+      hover:border-paper-300 focus:border-forest-300 focus:bg-paper-50;
+  }
+  .dark .field {
+    @apply bg-ink-900/50 text-paper-200 placeholder:text-ink-400
+      hover:border-ink-600 focus:border-forest-500 focus:bg-ink-900;
+  }
+
+  .label {
+    @apply text-[0.7rem] font-medium uppercase tracking-[0.14em] text-ink-300;
+  }
+  .dark .label {
+    @apply text-ink-300;
+  }
+
+  .rule {
+    @apply border-paper-300/80;
+  }
+  .dark .rule {
+    @apply border-ink-600/70;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-card border px-3 py-1.5
+      text-[0.85rem] transition-colors duration-200 ease-calm disabled:opacity-40;
+  }
+  .btn-quiet {
+    @apply btn border-paper-300 text-ink-500 hover:border-ink-300 hover:text-ink-700;
+  }
+  .dark .btn-quiet {
+    @apply border-ink-600 text-paper-200/80 hover:border-ink-300 hover:text-paper-100;
+  }
+  .btn-solid {
+    @apply btn border-forest-600 bg-forest-600 text-paper-50 hover:bg-forest-700 hover:border-forest-700;
+  }
+  .dark .btn-solid {
+    @apply border-forest-500 bg-forest-600 text-paper-100 hover:bg-forest-500;
+  }
+
+  .prose-note {
+    @apply whitespace-pre-wrap text-[0.95rem] leading-relaxed text-ink-500;
+  }
+  .dark .prose-note {
+    @apply text-paper-200/75;
+  }
+}
+
+@layer utilities {
+  .display {
+    @apply font-serif font-light tracking-[-0.015em];
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
