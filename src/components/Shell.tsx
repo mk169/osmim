@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { ROUTES, navigate, type Route } from '../lib/router';
 import { useStore } from '../store/store';
 import { cx, Modal } from './ui';
-import { SyncPanel } from './SyncPanel';
+import { AccountPanel } from './AccountPanel';
 import { formatShort, today } from '../lib/date';
 
 const NAV: { route: Route; label: string; hint: string }[] = [
@@ -89,9 +89,9 @@ function DataMenu() {
       <Modal open={open} onClose={() => setOpen(false)} title="Daten & Sicherung" wide>
         <section className="mb-8">
           <h3 className="display mb-3 text-lg text-ink-700 dark:text-paper-100">
-            Geräte abgleichen
+            Profil & Geräte
           </h3>
-          <SyncPanel />
+          <AccountPanel />
         </section>
 
         <section className="border-t rule pt-6">

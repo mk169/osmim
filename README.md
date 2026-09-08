@@ -101,32 +101,51 @@ weiter einzustellen, `BASE_PATH` bleibt leer.
 
 Beide Ziele können parallel laufen; sie stören einander nicht.
 
-## Geräte abgleichen
+## Profile und Geräteabgleich
 
-Ohne Einrichtung speichert die App nur lokal — Mac und iPhone bleiben
-getrennt. Für den Abgleich läuft auf Vercel eine kleine Funktion
-(`api/sync.ts`) über einen **Vercel-Blob-Speicher**.
+Ohne Anmeldung speichert die App nur lokal — die App funktioniert vollständig,
+aber Mac und iPhone bleiben getrennt. Für gemeinsame Daten gibt es **Profile
+mit Anmeldung** über Supabase (Anmeldung, Passwort-Zurücksetzen und Datenbank
+in einem, kostenlos für persönliche Nutzung).
 
-**Einmalig einrichten** — im Vercel-Dashboard des Projekts: *Storage →
-Create Database → Blob*, anlegen und mit dem Projekt verbinden. Vercel legt
-`BLOB_READ_WRITE_TOKEN` selbst als Umgebungsvariable an; danach einmal neu
-deployen. Mehr ist nicht nötig.
+**Einrichten** — drei Schritte, einmalig:
 
-**Benutzen** — unter *Daten & Sicherung → Geräte abgleichen* auf dem ersten
-Gerät einen Sync-Schlüssel erzeugen und hochladen, ihn auf dem zweiten Gerät
-eintragen und herunterladen.
+1. Auf supabase.com ein kostenloses Projekt anlegen.
+2. Im SQL-Editor `supabase/setup.sql` aus diesem Repository ausführen. Das legt
+   die Tabelle an und schaltet die Sicherheitsregeln ein, die jedem Profil
+   ausschließlich die eigene Zeile zugänglich machen.
+3. In den Vercel-Projekteinstellungen zwei Umgebungsvariablen setzen und einmal
+   neu deployen:
 
-**Sicherheit** — der gesamte Zustand wird im Browser mit AES-GCM
-verschlüsselt; der Schlüssel wird per HKDF aus deinem Sync-Schlüssel
-abgeleitet und verlässt das Gerät nie. Zum Server geht nur eine SHA-256-
-Kennung (wohin) und der Geheimtext (was). Wer den Speicher liest, sieht
-nichts Verwertbares. Wer den Sync-Schlüssel hat, sieht alles — er ist ein
-Passwort, und er ist nicht wiederherstellbar.
+   ```
+   VITE_SUPABASE_URL       = https://<projekt>.supabase.co
+   VITE_SUPABASE_ANON_KEY  = <der öffentliche anon key>
+   ```
 
-Der Abgleich läuft bewusst über zwei sichtbare Knöpfe statt im Hintergrund:
-bei zwei Geräten gewinnt sonst irgendwann der letzte Schreibvorgang, ohne
-dass jemand es merkt. Auf GitHub Pages gibt es keine Serverfunktionen — dort
-bleibt es beim Datei-Backup.
+Der Anon-Key ist zur Veröffentlichung gedacht; geschützt wird nicht durch ihn,
+sondern durch die Sicherheitsregeln der Datenbank.
+
+**Benutzen** — unter *Daten & Sicherung → Profil & Geräte* ein Profil anlegen
+und sich auf dem zweiten Gerät mit derselben E-Mail anmelden. Danach läuft der
+Abgleich von selbst: beim Anmelden wird geladen, jede Änderung gebündelt
+gesichert, und beim Zurückkommen ans Fenster wird nachgesehen, ob ein anderes
+Gerät etwas geschrieben hat.
+
+Gefragt wird nur an einer Stelle — wenn beim ersten Anmelden auf einem Gerät
+sowohl lokal als auch im Profil Daten liegen. Dort still zu entscheiden hieße,
+einem der beiden Stände die Arbeit zu nehmen.
+
+**Vertraulichkeit** — mit Profil liegen die Daten in deiner Supabase-Datenbank.
+Die Sicherheitsregeln verhindern fremden Zugriff, und wer das Projekt besitzt,
+bist du. Anders als beim Sync-Schlüssel sind sie dort aber nicht Ende zu Ende
+verschlüsselt: wer Zugriff auf die Datenbank hat, kann sie lesen. Das ist der
+Preis dafür, dass ein vergessenes Passwort zurückgesetzt werden kann.
+
+**Ohne Supabase** bleibt die ältere Möglichkeit erhalten: ein Sync-Schlüssel
+über einen Vercel-Blob-Speicher (`api/sync.ts`), Ende zu Ende verschlüsselt,
+ohne Anmeldung — dafür ohne Wiederherstellung. Die Oberfläche zeigt automatisch
+den Weg, der eingerichtet ist. Auf GitHub Pages gibt es weder das eine noch das
+andere; dort bleibt es beim Datei-Backup.
 
 ## Aufbau
 
