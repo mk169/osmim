@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { AppState, DateISO, DayEntry } from '../types';
 import { AREAS, STATE_VERSION, createSeedState } from '../data/seed';
+import { purgeDemoData } from './legacy';
 import { today } from '../lib/date';
 
 const STORAGE_KEY = 'personal-os-v2';
@@ -38,12 +39,16 @@ export function migrate(raw: unknown): AppState {
   const seed = createSeedState();
   if (!raw || typeof raw !== 'object') return seed;
   const parsed = raw as Partial<AppState>;
+  const fromOlderVersion = (parsed.version ?? 0) < STATE_VERSION;
 
+  // Bereiche sind frei anlegbar: gespeicherte Bereiche gelten, fehlende
+  // Felder werden aus der Vorlage ergänzt.
+  const blank = AREAS[0];
   const areas = Array.isArray(parsed.areas) && parsed.areas.length
-    ? AREAS.map((a) => ({ ...a, ...parsed.areas!.find((p) => p.id === a.id) }))
+    ? parsed.areas.map((a) => ({ ...blank, ...a }))
     : seed.areas;
 
-  return {
+  const merged: AppState = {
     ...seed,
     ...parsed,
     version: STATE_VERSION,
@@ -69,6 +74,9 @@ export function migrate(raw: unknown): AppState {
     weekFocus: parsed.weekFocus ?? {},
     focusList: parsed.focusList ?? [],
   };
+
+  // Beispieldaten der ersten Fassung einmalig entfernen.
+  return fromOlderVersion ? purgeDemoData(merged) : merged;
 }
 
 function load(): AppState {

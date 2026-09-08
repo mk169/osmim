@@ -5,10 +5,13 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* Fläche hinter Diagrammen — Marker setzen sich damit ab. */
+    --chart-surface: #fbf9f4;
   }
 
   html.dark {
     color-scheme: dark;
+    --chart-surface: #1c1b18;
   }
 
   html {

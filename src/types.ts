@@ -14,16 +14,24 @@ export type DateISO = string;
 /** Vollständiger ISO-Zeitstempel. */
 export type DateTimeISO = string;
 
-export type AreaKey =
-  | 'attention'
-  | 'study'
-  | 'body'
-  | 'relationships'
-  | 'faith'
-  | 'culture'
-  | 'creativity'
-  | 'ventures'
-  | 'daily';
+/**
+ * Bereiche sind frei anlegbar, deshalb ist die Kennung eine gewöhnliche
+ * Zeichenkette und keine feste Liste.
+ */
+export type AreaKey = string;
+
+/**
+ * Optionales Zusatzwerkzeug eines Bereichs. Standard ist keines — der
+ * Bereich bleibt eine leere Vorlage, bis du eines einschaltest.
+ */
+export type AreaModule =
+  | 'exams'
+  | 'applications'
+  | 'contacts'
+  | 'finances'
+  | 'library'
+  | 'practice'
+  | 'log';
 
 export interface Area {
   id: AreaKey;
@@ -43,6 +51,8 @@ export interface Area {
   /** Rückblick, frei formuliert. */
   review: string;
   accent: 'forest' | 'wine' | 'brass' | 'ink';
+  /** Eingeschaltete Zusatzwerkzeuge. Leer = reine Vorlage. */
+  modules?: AreaModule[];
 }
 
 export type GoalHorizon = 'season' | 'year' | 'horizon';
@@ -258,6 +268,10 @@ export interface WeekReview {
   distraction: string;
   people: string;
   waiting: string;
+  /** Selbsteinschätzung der Woche, 1–10. Ergibt den Verlauf im Archiv. */
+  score?: number;
+  /** Gesetzt, sobald die Review abgeschlossen und archiviert wurde. */
+  savedAt?: DateTimeISO;
   createdAt: DateTimeISO;
 }
 

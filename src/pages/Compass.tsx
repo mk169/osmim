@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { useStore } from '../store/store';
 import { FocusList } from '../components/FocusList';
+import { GoalModal } from '../components/GoalModal';
+import { newId } from '../store/actions';
+import { GOAL_FRAMEWORK, GOAL_STATUS } from '../lib/labels';
+import type { GoalHorizon } from '../types';
 import {
   Card,
   DeleteButton,
+  Empty,
   InlineEdit,
   PageHeader,
+  Pill,
   QuickAdd,
+  QuietLine,
   SectionTitle,
   cx,
 } from '../components/ui';
@@ -41,6 +49,110 @@ function ListBlock({
       </ul>
       <QuickAdd placeholder={placeholder} onAdd={onAdd} />
     </>
+  );
+}
+
+/**
+ * Ziele, die über eine Saison hinausreichen. Hier entstehen sie — in die
+ * Saison wandern sie erst, wenn sie an der Reihe sind.
+ */
+function HorizonGoals() {
+  const { state, update } = useStore();
+  const [open, setOpen] = useState<string | null>(null);
+
+  const goals = state.goals.filter((g) => g.horizon !== 'season');
+
+  const HORIZON_LABEL: Record<GoalHorizon, string> = {
+    season: 'Saison',
+    year: 'Dieses Jahr',
+    horizon: 'Am Horizont',
+  };
+
+  return (
+    <Card>
+      <SectionTitle
+        right={
+          <span className="text-[0.78rem] text-ink-300">
+            {goals.length} {goals.length === 1 ? 'Ziel' : 'Ziele'}
+          </span>
+        }
+      >
+        Ziele am Horizont
+      </SectionTitle>
+      <p className="mb-5 max-w-xl text-[0.88rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+        Was über eine Saison hinausreicht, gehört hierher. Anklicken öffnet das Ziel —
+        dort lässt sich ein Denkrahmen wählen und der Zeithorizont auf die laufende
+        Saison umstellen.
+      </p>
+
+      {goals.length === 0 ? (
+        <Empty
+          title="Noch kein Ziel"
+          text="Beginn mit einem einzigen Satz. Genauer wird es von allein."
+        />
+      ) : (
+        <ul className="mb-5 space-y-3">
+          {goals.map((g) => (
+            <li key={g.id} className="group rounded-card border rule p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setOpen(g.id)}
+                  className="min-w-0 flex-1 text-left text-[0.98rem] text-ink-700 hover:underline hover:decoration-paper-400 hover:underline-offset-4 dark:text-paper-100"
+                >
+                  {g.title}
+                </button>
+                <Pill tone="muted">{HORIZON_LABEL[g.horizon]}</Pill>
+                {(g.framework ?? 'none') !== 'none' && (
+                  <Pill tone="brass">{GOAL_FRAMEWORK[g.framework ?? 'none'].label}</Pill>
+                )}
+                <Pill tone={g.status === 'done' ? 'forest' : 'neutral'}>
+                  {GOAL_STATUS[g.status]}
+                </Pill>
+                <DeleteButton
+                  label="Ziel entfernen"
+                  confirm={`„${g.title}“ löschen?`}
+                  onDelete={() =>
+                    update((s) => ({ ...s, goals: s.goals.filter((x) => x.id !== g.id) }))
+                  }
+                />
+              </div>
+              {g.detail && (
+                <p className="mt-1 text-[0.88rem] text-ink-400 dark:text-paper-200/60">
+                  {g.detail}
+                </p>
+              )}
+              <div className="mt-3">
+                <QuietLine value={g.progress} tone="brass" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <QuickAdd
+        placeholder="Ein Ziel, das weiter reicht als diese Saison …"
+        onAdd={(title) =>
+          update((s) => ({
+            ...s,
+            goals: [
+              ...s.goals,
+              {
+                id: newId('goal'),
+                title,
+                areaId: s.areas[0]?.id ?? '',
+                horizon: 'horizon',
+                status: 'open',
+                progress: 0,
+                createdAt: new Date().toISOString(),
+              },
+            ],
+          }))
+        }
+      />
+
+      <GoalModal id={open} onClose={() => setOpen(null)} />
+    </Card>
   );
 }
 
@@ -154,6 +266,10 @@ export function Compass() {
             }
           />
         </div>
+      </section>
+
+      <section className="mb-12">
+        <HorizonGoals />
       </section>
 
       <section className="mb-12">

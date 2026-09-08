@@ -1,5 +1,6 @@
 import type {
   ApplicationStatus,
+  AreaModule,
   GoalFramework,
   ContactCircle,
   EventKind,
@@ -191,3 +192,26 @@ export const GOAL_FRAMEWORK: Record<GoalFramework, FrameworkDef> = {
 };
 
 export const GOAL_FRAMEWORK_ORDER: GoalFramework[] = ['none', 'smart', 'okr', 'woop'];
+
+
+/* --------------------------------------------------- Bereichs-Werkzeuge */
+
+export const AREA_MODULE: Record<AreaModule, { label: string; blurb: string }> = {
+  exams: { label: 'Prüfungen', blurb: 'Termine, Gewichtung, Lernplan, nächster Schritt' },
+  applications: { label: 'Bewerbungen', blurb: 'Unternehmen, Rolle, Status, nächste Aktion' },
+  contacts: { label: 'Menschen', blurb: 'Letzte Begegnung, nächster kleiner Schritt' },
+  finances: { label: 'Finanzen', blurb: 'Einnahmen, Fixkosten, Sparziel, offene Zahlungen' },
+  library: { label: 'Bibliothek', blurb: 'Bücher, Zitate, Kunst, Orte' },
+  practice: { label: 'Tägliche Praxis', blurb: 'Kleine Übungen, heute abhakbar' },
+  log: { label: 'Protokoll', blurb: 'Kurz notieren — landet im Journal' },
+};
+
+export const AREA_MODULE_ORDER: AreaModule[] = [
+  'practice',
+  'log',
+  'contacts',
+  'exams',
+  'applications',
+  'library',
+  'finances',
+];

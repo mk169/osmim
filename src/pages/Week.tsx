@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../store/store';
 import { newId } from '../store/actions';
 import { EVENT_COLOR, EVENT_KIND, options } from '../lib/labels';
+import { WeekTrend } from '../components/WeekTrend';
 import type { CalendarEvent, EventKind, WeekReview } from '../types';
 import {
   AutoTextarea,
@@ -347,7 +348,9 @@ function EventChip({
   );
 }
 
-const REVIEW_FIELDS: { key: keyof Omit<WeekReview, 'id' | 'weekStart' | 'createdAt' | 'focus'>; q: string }[] = [
+type ReviewKey = 'finished' | 'energy' | 'distraction' | 'people' | 'waiting';
+
+const REVIEW_FIELDS: { key: ReviewKey; q: string }[] = [
   { key: 'finished', q: 'Was habe ich beendet?' },
   { key: 'energy', q: 'Was hat mir Energie gegeben?' },
   { key: 'distraction', q: 'Wo bin ich wieder in Zerstreuung geraten?' },
@@ -355,9 +358,46 @@ const REVIEW_FIELDS: { key: keyof Omit<WeekReview, 'id' | 'weekStart' | 'created
   { key: 'waiting', q: 'Was darf bewusst warten?' },
 ];
 
+/** Skala 1–10, ohne Wertung: nur, wie die Woche sich angefühlt hat. */
+function ScoreScale({
+  value,
+  onChange,
+}: {
+  value?: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1.5">
+        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+          <button
+            key={n}
+            type="button"
+            aria-label={`${n} von 10`}
+            aria-pressed={value === n}
+            onClick={() => onChange(n)}
+            className={cx(
+              'h-9 w-9 rounded-full border text-[0.85rem] tabular-nums transition-colors duration-200 ease-calm',
+              value === n
+                ? 'border-forest-500 bg-forest-500 text-paper-50 dark:border-forest-300 dark:bg-forest-300 dark:text-ink-800'
+                : 'border-paper-300 text-ink-400 hover:border-ink-300 dark:border-ink-600 dark:text-paper-200/70 dark:hover:border-ink-500',
+            )}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-[0.78rem] text-ink-300 dark:text-paper-200/45">
+        1 = zäh und zerstreut · 10 = klar und getragen. Es gibt keinen richtigen Wert.
+      </p>
+    </div>
+  );
+}
+
 function WeekReviewPanel({ weekStart }: { weekStart: string }) {
   const { state, update } = useStore();
   const review = state.weekReviews.find((r) => r.weekStart === weekStart);
+  const saved = Boolean(review?.savedAt);
 
   const patch = (patchValue: Partial<WeekReview>) =>
     update((s) => {
@@ -392,13 +432,24 @@ function WeekReviewPanel({ weekStart }: { weekStart: string }) {
 
   return (
     <Card>
-      <SectionTitle>Wochenreview</SectionTitle>
+      <SectionTitle
+        right={
+          saved ? (
+            <Pill tone="forest">abgeschlossen</Pill>
+          ) : (
+            <span className="text-[0.78rem] text-ink-300">offen</span>
+          )
+        }
+      >
+        Wochenreview
+      </SectionTitle>
       <p className="mb-6 text-[0.88rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
         Fünf Fragen, in Ruhe beantwortet. Es gibt keine falschen Antworten und keine Punkte.
       </p>
+
       <div className="space-y-5">
         {REVIEW_FIELDS.map(({ key, q }, i) => (
-          <div key={key} className="border-b rule pb-5 last:border-b-0 last:pb-0">
+          <div key={key} className="border-b rule pb-5">
             <div className="mb-1 flex items-baseline gap-3">
               <span className="text-[0.72rem] tabular-nums text-ink-300">{i + 1}</span>
               <p className="display text-[1.05rem] text-ink-700 dark:text-paper-100">{q}</p>
@@ -414,6 +465,49 @@ function WeekReviewPanel({ weekStart }: { weekStart: string }) {
           </div>
         ))}
       </div>
+
+      <div className="mt-6">
+        <p className="label mb-3">Wie war die Woche insgesamt?</p>
+        <ScoreScale value={review?.score} onChange={(v) => patch({ score: v })} />
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t rule pt-5">
+        <p className="text-[0.83rem] text-ink-300 dark:text-paper-200/45">
+          {saved
+            ? 'Diese Woche liegt im Archiv und zählt im Verlauf.'
+            : 'Abschließen legt die Review ins Archiv und trägt sie in den Verlauf ein.'}
+        </p>
+        {saved ? (
+          <button
+            type="button"
+            onClick={() => patch({ savedAt: undefined })}
+            className="btn-quiet"
+          >
+            Wieder öffnen
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => patch({ savedAt: new Date().toISOString() })}
+            disabled={!review?.score}
+            title={!review?.score ? 'Bitte zuerst die Woche einschätzen.' : undefined}
+            className="btn-solid"
+          >
+            Woche abschließen
+          </button>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function WeekTrendPanel() {
+  const { state } = useStore();
+  const saved = state.weekReviews.filter((r) => r.savedAt);
+  return (
+    <Card>
+      <SectionTitle>Verlauf</SectionTitle>
+      <WeekTrend reviews={saved} />
     </Card>
   );
 }
@@ -538,7 +632,10 @@ export function Week() {
         </Card>
       </section>
 
-      <WeekReviewPanel weekStart={weekStart} />
+      <div className="space-y-4">
+        <WeekReviewPanel weekStart={weekStart} />
+        <WeekTrendPanel />
+      </div>
 
       {state.events.length === 0 && (
         <div className="mt-8">

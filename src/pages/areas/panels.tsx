@@ -139,6 +139,7 @@ export function ExamPanel() {
   );
 }
 
+
 export function ApplicationPanel() {
   const { state, update } = useStore();
 
@@ -223,33 +224,6 @@ export function ApplicationPanel() {
   );
 }
 
-export function CareerHypotheses() {
-  const { state, update } = useStore();
-  const area = state.areas.find((a) => a.id === 'study');
-  if (!area) return null;
-  return (
-    <Card>
-      <SectionTitle>Karriere-Hypothesen</SectionTitle>
-      <p className="mb-3 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
-        Hypothesen, keine Entscheidungen. Sie dürfen sich widersprechen.
-      </p>
-      <InlineEdit
-        value={area.extra}
-        placeholder="Welche Richtungen kommen infrage?"
-        onSave={(v) =>
-          update((s) => ({
-            ...s,
-            areas: s.areas.map((a) => (a.id === 'study' ? { ...a, extra: v } : a)),
-          }))
-        }
-        className="-mx-2"
-        displayClassName="text-[0.92rem]"
-      />
-    </Card>
-  );
-}
-
-/* ------------------------------------------------------- D — Beziehungen */
 
 export function ContactPanel() {
   const { state, update } = useStore();
@@ -379,6 +353,7 @@ export function ContactPanel() {
 
 /* ---------------------------------------------------------- F — Bibliothek */
 
+
 export function LibraryPanel({ compact }: { compact?: boolean }) {
   const { state, update } = useStore();
   const [kind, setKind] = useState<LibraryKind>('book');
@@ -448,10 +423,11 @@ export function LibraryPanel({ compact }: { compact?: boolean }) {
   );
 }
 
-export function LanguagePanel() {
+
+export function PracticePanel({ areaId }: { areaId: string }) {
   const { state, update } = useStore();
   const t = today();
-  const habits = state.habits.filter((h) => h.areaId === 'culture');
+  const habits = state.habits.filter((h) => h.areaId === areaId);
 
   return (
     <Card>
@@ -524,7 +500,7 @@ export function LanguagePanel() {
               ...s,
               habits: [
                 ...s.habits,
-                { id: newId('habit'), title, areaId: 'culture', cadence: 'daily', log: [] },
+                { id: newId('habit'), title, areaId, cadence: 'daily', log: [] },
               ],
             }))
           }
@@ -538,6 +514,7 @@ export function LanguagePanel() {
 
 const euro = (n: number) =>
   n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
 
 export function FinancePanel() {
   const { state, update } = useStore();
@@ -667,191 +644,51 @@ export function FinancePanel() {
   );
 }
 
-export function RoutinePanel() {
+
+export function LogPanel({ areaId }: { areaId: string }) {
   const { state, update } = useStore();
-  const area = state.areas.find((a) => a.id === 'daily');
-  if (!area) return null;
-
-  return (
-    <Card>
-      <SectionTitle>Routinen & Reisen</SectionTitle>
-      <p className="mb-3 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
-        Was regelmäßig wiederkehrt und was ansteht — Wäsche, Papiere, Zahlungen,
-        eine Reise. Aufgeschrieben muss es nicht mehr erinnert werden.
-      </p>
-      <InlineEdit
-        value={area.extra}
-        placeholder="Wäsche montags. Zimmer freitags. Papiere am Monatsanfang …"
-        onSave={(v) =>
-          update((s) => ({
-            ...s,
-            areas: s.areas.map((a) => (a.id === 'daily' ? { ...a, extra: v } : a)),
-          }))
-        }
-        className="-mx-2 min-h-[5rem]"
-        displayClassName="text-[0.92rem] leading-relaxed"
-      />
-    </Card>
-  );
-}
-
-/* ------------------------------------------------------------- C — Körper */
-
-export function BodyPanel() {
-  const { state, update } = useStore();
-  const area = state.areas.find((a) => a.id === 'body');
   const [log, setLog] = useState('');
-
-  const trainings = state.events.filter((e) => e.kind === 'training').length;
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <SectionTitle>Körperbild</SectionTitle>
-        <dl className="space-y-3 text-[0.92rem]">
-          <div className="flex justify-between gap-4 border-b rule pb-3">
-            <dt className="text-ink-300 dark:text-paper-200/50">Ziel</dt>
-            <dd className="text-ink-600 dark:text-paper-200/85">ca. 16 % KFA, gesund</dd>
-          </div>
-          <div className="flex justify-between gap-4 border-b rule pb-3">
-            <dt className="text-ink-300 dark:text-paper-200/50">Rhythmus</dt>
-            <dd className="text-ink-600 dark:text-paper-200/85">3 Einheiten pro Woche</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-ink-300 dark:text-paper-200/50">Im Kalender</dt>
-            <dd className="text-ink-600 dark:text-paper-200/85">{trainings} Einheiten geplant</dd>
-          </div>
-        </dl>
-        {area && (
-          <div className="mt-5 border-t rule pt-4">
-            <p className="label mb-2">Ernährungsprinzipien</p>
-            <div className="-mx-2">
-              <InlineEdit
-                value={area.extra}
-                placeholder="Einfache Prinzipien statt Kalorienzählen …"
-                onSave={(v) =>
-                  update((s) => ({
-                    ...s,
-                    areas: s.areas.map((a) => (a.id === 'body' ? { ...a, extra: v } : a)),
-                  }))
-                }
-                displayClassName="text-[0.9rem] leading-relaxed"
-              />
-            </div>
-          </div>
-        )}
-      </Card>
-
-      <Card>
-        <SectionTitle>Trainingstagebuch</SectionTitle>
-        <p className="mb-3 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
-          Kurz notieren, was war — Übungen, Schritte, Schlaf, Energie. Keine Zahlenjagd.
-        </p>
-        <textarea
-          value={log}
-          onChange={(e) => setLog(e.target.value)}
-          rows={4}
-          placeholder="Kniebeugen 4×6, danach 20 Min. Rad. Schlaf gut, Energie mittel."
-          className="field resize-none leading-relaxed"
-        />
-        <div className="mt-3 flex justify-end">
-          <button
-            type="button"
-            disabled={!log.trim()}
-            onClick={() => {
-              update((s) => ({
-                ...s,
-                journal: [
-                  {
-                    id: newId('journal'),
-                    title: `Training ${formatShort(today())}`,
-                    body: log.trim(),
-                    template: 'free',
-                    tags: ['körper'],
-                    createdAt: new Date().toISOString(),
-                  },
-                  ...s.journal,
-                ],
-              }));
-              setLog('');
-            }}
-            className="btn-quiet"
-          >
-            Ins Journal legen
-          </button>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------- E — Glaube */
-
-export function FaithPanel() {
-  const { state, update } = useStore();
-  const t = today();
-  const habits = state.habits.filter((h) => h.areaId === 'faith');
+  const area = state.areas.find((a) => a.id === areaId);
 
   return (
     <Card>
-      <SectionTitle>Praxis</SectionTitle>
-      <p className="mb-4 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
-        Hier wird nichts gezählt und nichts bewertet. Nur eine sanfte Erinnerung,
-        dass es diese Dinge gibt.
+      <SectionTitle>Protokoll</SectionTitle>
+      <p className="mb-3 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+        Kurz notieren, was war. Der Eintrag wandert ins Journal und ist dort
+        durchsuchbar — hier bleibt nichts liegen.
       </p>
-      {habits.length === 0 && (
-        <p className="mb-4 text-[0.9rem] text-ink-300 dark:text-paper-200/45">
-          Noch nichts eingetragen. Gebet, Messe, Lektüre, Dankbarkeit — was davon
-          gehört zu deinem Tag?
-        </p>
-      )}
-      <ul className="space-y-1">
-        {habits.map((h) => {
-          const done = h.log.includes(t);
-          return (
-            <li key={h.id} className="group flex items-center justify-between gap-4 py-1.5">
-              <span className="text-[0.94rem] text-ink-600 dark:text-paper-200/85">{h.title}</span>
-              <button
-                type="button"
-                onClick={() =>
-                  update((s) => ({
-                    ...s,
-                    habits: s.habits.map((x) =>
-                      x.id === h.id
-                        ? {
-                            ...x,
-                            log: done ? x.log.filter((d) => d !== t) : [...x.log, t].sort(),
-                          }
-                        : x,
-                    ),
-                  }))
-                }
-                className={cx(
-                  'text-[0.78rem] transition-colors duration-300',
-                  done
-                    ? 'text-forest-600 dark:text-forest-300'
-                    : 'text-ink-300 hover:text-ink-500 dark:hover:text-paper-100',
-                )}
-              >
-                {done ? 'heute gehalten' : 'heute'}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="mt-5 border-t rule pt-4">
-        <QuickAdd
-          placeholder="Was gehört zu deiner Praxis?"
-          onAdd={(title) =>
+      <textarea
+        value={log}
+        onChange={(e) => setLog(e.target.value)}
+        rows={4}
+        placeholder="Was war heute in diesem Bereich?"
+        className="field resize-none leading-relaxed"
+      />
+      <div className="mt-3 flex justify-end">
+        <button
+          type="button"
+          disabled={!log.trim()}
+          onClick={() => {
             update((s) => ({
               ...s,
-              habits: [
-                ...s.habits,
-                { id: newId('habit'), title, areaId: 'faith', cadence: 'daily', log: [] },
+              journal: [
+                {
+                  id: newId('journal'),
+                  title: `${area?.title ?? 'Notiz'} — ${formatShort(today())}`,
+                  body: log.trim(),
+                  template: 'free',
+                  tags: [],
+                  createdAt: new Date().toISOString(),
+                },
+                ...s.journal,
               ],
-            }))
-          }
-        />
+            }));
+            setLog('');
+          }}
+          className="btn-quiet"
+        >
+          Ins Journal legen
+        </button>
       </div>
     </Card>
   );

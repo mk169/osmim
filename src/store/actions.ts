@@ -107,7 +107,12 @@ export function removeInbox(state: AppState, id: ID): AppState {
 
 /* -------------------------------------------------------------- Projekte */
 
+/**
+ * 25/5: fünf Projekte laufen parallel, zwanzig warten in der Pipeline.
+ * Die fünf sind die Arbeit; die zwanzig sind das, was man dafür nicht tut.
+ */
 export const ACTIVE_PROJECT_LIMIT = 5;
+export const PIPELINE_LIMIT = 20;
 
 export function activeProjects(state: AppState): Project[] {
   return state.projects.filter((p) => p.status === 'active');

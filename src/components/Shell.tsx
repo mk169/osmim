@@ -9,7 +9,7 @@ const NAV: { route: Route; label: string; hint: string }[] = [
   { route: 'woche', label: 'Woche', hint: 'Kalender und Review' },
   { route: 'saison', label: 'Saison', hint: 'Zeitraum und Ziele' },
   { route: 'journal', label: 'Journal', hint: 'Einträge und Vorlagen' },
-  { route: 'bereiche', label: 'Bereiche', hint: 'Neun Lebensbereiche' },
+  { route: 'bereiche', label: 'Bereiche', hint: 'Deine Lebensfelder' },
   { route: 'projekte', label: 'Projekte', hint: 'Inbox und Vorhaben' },
   { route: 'kompass', label: 'Kompass', hint: 'Identität und Richtung' },
   { route: 'archiv', label: 'Archiv', hint: 'Was gewesen ist' },

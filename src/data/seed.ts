@@ -1,7 +1,7 @@
 import type { AppState, Area, DateISO } from '../types';
 import { addDays, startOfWeek, today } from '../lib/date';
 
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3;
 
 let counter = 0;
 /** Deterministische IDs für Seed-Daten, zufällige zur Laufzeit. */

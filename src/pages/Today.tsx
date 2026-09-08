@@ -289,14 +289,32 @@ export function Today() {
       </header>
 
       <Card>
-        <p className="label mb-2">Wie will ich heute auftreten?</p>
-        <InlineEdit
-          value={entry.intention}
-          onSave={(v) => patchDay(date, { intention: v })}
-          placeholder="Ruhig, aufmerksam, freundlich — und pünktlich."
-          displayClassName="display text-xl sm:text-2xl leading-snug"
-          className="-mx-2"
-        />
+        <div className="mb-4 flex items-baseline justify-between gap-4">
+          <p className="label">Termine</p>
+          <button
+            type="button"
+            onClick={() => navigate('woche')}
+            className="text-[0.76rem] text-ink-300 underline-offset-2 hover:text-ink-500 hover:underline dark:hover:text-paper-100"
+          >
+            zur Woche
+          </button>
+        </div>
+        {dayEvents.length === 0 ? (
+          <p className="text-[0.9rem] text-ink-300 dark:text-paper-200/45">
+            Heute steht nichts im Kalender.
+          </p>
+        ) : (
+          <ul className="space-y-2.5">
+            {dayEvents.map((e) => (
+              <li key={e.id} className="flex items-baseline gap-4 text-[0.92rem]">
+                <span className="w-24 shrink-0 tabular-nums text-ink-300 dark:text-paper-200/45">
+                  {[e.start, e.end].filter(Boolean).join('–') || '—'}
+                </span>
+                <span className="text-ink-600 dark:text-paper-200/85">{e.title}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <OneThing date={date} />
@@ -309,23 +327,7 @@ export function Today() {
 
       <AttentionRow date={date} />
 
-      {dayEvents.length > 0 && (
-        <Card>
-          <p className="label mb-4">Heute im Kalender</p>
-          <ul className="space-y-2.5">
-            {dayEvents.map((e) => (
-              <li key={e.id} className="flex items-baseline gap-4 text-[0.92rem]">
-                <span className="w-24 shrink-0 tabular-nums text-ink-300 dark:text-paper-200/45">
-                  {[e.start, e.end].filter(Boolean).join('–') || '—'}
-                </span>
-                <span className="text-ink-600 dark:text-paper-200/85">{e.title}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4">
         <Card>
           <p className="label mb-2">Was ist gerade in meinem Kopf?</p>
           <InlineEdit
@@ -348,24 +350,6 @@ export function Today() {
           )}
         </Card>
 
-        <Card
-          className={cx(
-            'transition-colors duration-500 ease-calm',
-            evening && 'border-brass-300/60 dark:border-brass-500/40',
-          )}
-        >
-          <p className="label mb-2">Was war heute ein guter Moment?</p>
-          <InlineEdit
-            value={entry.goodMoment}
-            onSave={(v) => patchDay(date, { goodMoment: v })}
-            placeholder={
-              evening
-                ? 'Auch ein kleiner zählt. Das Licht am Nachmittag zum Beispiel.'
-                : 'Später am Abend, in Ruhe.'
-            }
-            className="-mx-2 min-h-[5rem]"
-          />
-        </Card>
       </div>
 
       <p className="pb-4 pt-2 text-center text-[0.8rem] italic text-ink-300 dark:text-paper-200/35">

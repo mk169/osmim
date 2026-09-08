@@ -115,7 +115,10 @@ function GoalRow({ id, onOpen }: { id: string; onOpen: () => void }) {
 
 /** Zeitraum der Saison: Vorlagen und freie Daten. */
 const PERIODS: { label: string; days: number }[] = [
+  { label: '7 Tage', days: 7 },
+  { label: '14 Tage', days: 14 },
   { label: '30 Tage', days: 30 },
+  { label: '60 Tage', days: 60 },
   { label: '90 Tage', days: 90 },
   { label: 'Halbjahr', days: 182 },
   { label: 'Jahr', days: 365 },
@@ -187,10 +190,6 @@ function PeriodControls() {
         </label>
       </div>
 
-      <p className="mt-4 text-[0.83rem] leading-relaxed text-ink-300 dark:text-paper-200/45">
-        Neunzig Tage sind eine gute Vorgabe, keine Vorschrift. Ein Monat reicht für
-        eine Gewohnheit, ein Jahr für eine Richtung.
-      </p>
     </Card>
   );
 }

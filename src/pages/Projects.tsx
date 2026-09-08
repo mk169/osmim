@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../store/store';
 import {
   ACTIVE_PROJECT_LIMIT,
+  PIPELINE_LIMIT,
   addInbox,
   addProject,
   addTask,
@@ -33,7 +34,8 @@ import {
   TextField,
   cx,
 } from '../components/ui';
-import { today } from '../lib/date';
+import { startOfWeek, today, weekDays } from '../lib/date';
+import { navigate } from '../lib/router';
 
 /* ---------------------------------------------------------------- Inbox */
 
@@ -270,10 +272,44 @@ function Rating({ project }: { project: Project }) {
  */
 const FLOW: ProjectStatus[] = ['idea', 'exploring', 'active', 'done'];
 
+/** Was eine Stufe bedeutet — und was sie voraussetzt. */
+const STAGE: Record<
+  ProjectStatus,
+  { meaning: string; needs: (p: Project, activeCount: number) => string | null }
+> = {
+  idea: {
+    meaning: 'Aufgeschrieben, mehr nicht. Darf ewig hier liegen.',
+    needs: () => null,
+  },
+  exploring: {
+    meaning: 'Du prüfst, ob es das wert ist — ohne dich schon zu binden.',
+    needs: (p) => (p.why.trim() ? null : 'Es fehlt das Warum.'),
+  },
+  active: {
+    meaning: 'Läuft. Es gibt ein Ergebnis, eine nächste Handlung und einen Platz unter den fünf.',
+    needs: (p, activeCount) => {
+      if (!p.outcome.trim()) return 'Es fehlt das gewünschte Ergebnis.';
+      if (!p.nextAction.trim()) return 'Es fehlt die nächste physische Handlung.';
+      if (p.status !== 'active' && activeCount >= ACTIVE_PROJECT_LIMIT)
+        return `Fünf Projekte laufen bereits. Pausiere eines, um Platz zu machen.`;
+      return null;
+    },
+  },
+  paused: {
+    meaning: 'Bewusst zur Seite gelegt. Kein Rückschritt.',
+    needs: () => null,
+  },
+  done: {
+    meaning: 'Abgeschlossen und im Archiv.',
+    needs: (p) => (p.outcome.trim() ? null : 'Ohne Ergebnis lässt sich nichts abschließen.'),
+  },
+};
+
 function Workflow({ project }: { project: Project }) {
-  const { update } = useStore();
+  const { state, update } = useStore();
   const paused = project.status === 'paused';
   const currentIndex = FLOW.indexOf(project.status);
+  const activeCount = state.projects.filter((p) => p.status === 'active').length;
 
   const setStatus = (status: ProjectStatus) =>
     update((s) =>
@@ -289,19 +325,24 @@ function Workflow({ project }: { project: Project }) {
         {FLOW.map((step, i) => {
           const reached = !paused && currentIndex >= i;
           const isCurrent = !paused && currentIndex === i;
+          const blocker = STAGE[step].needs(project, activeCount);
           return (
             <div key={step} className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => setStatus(step)}
+                onClick={() => !blocker && setStatus(step)}
+                disabled={Boolean(blocker) && !isCurrent}
                 aria-current={isCurrent ? 'step' : undefined}
+                title={blocker ?? STAGE[step].meaning}
                 className={cx(
                   'rounded-full border px-3 py-1 text-[0.8rem] transition-colors duration-200 ease-calm',
                   isCurrent
                     ? 'border-forest-500 bg-forest-500 text-paper-50 dark:border-forest-300 dark:bg-forest-300 dark:text-ink-800'
                     : reached
                       ? 'border-forest-300 text-forest-600 dark:border-forest-500 dark:text-forest-300'
-                      : 'border-paper-300 text-ink-300 hover:border-ink-300 hover:text-ink-500 dark:border-ink-600 dark:hover:border-ink-500 dark:hover:text-paper-200/80',
+                      : blocker
+                        ? 'border-paper-300/60 text-ink-300/60 dark:border-ink-700 dark:text-paper-200/25'
+                        : 'border-paper-300 text-ink-300 hover:border-ink-300 hover:text-ink-500 dark:border-ink-600 dark:hover:border-ink-500 dark:hover:text-paper-200/80',
                 )}
               >
                 {PROJECT_STATUS[step]}
@@ -322,9 +363,26 @@ function Workflow({ project }: { project: Project }) {
         })}
       </div>
 
+      <p className="mt-3 text-[0.84rem] leading-relaxed text-ink-400 dark:text-paper-200/60">
+        {STAGE[project.status].meaning}
+      </p>
+
+      {(() => {
+        const next = FLOW[currentIndex + 1];
+        if (paused || !next) return null;
+        const blocker = STAGE[next].needs(project, activeCount);
+        return (
+          <p className="mt-1 text-[0.82rem] text-ink-300 dark:text-paper-200/45">
+            {blocker
+              ? `Für „${PROJECT_STATUS[next]}“: ${blocker}`
+              : `Bereit für „${PROJECT_STATUS[next]}“.`}
+          </p>
+        );
+      })()}
+
       <button
         type="button"
-        onClick={() => setStatus(paused ? 'active' : 'paused')}
+        onClick={() => setStatus(paused ? 'exploring' : 'paused')}
         className={cx(
           'mt-3 text-[0.78rem] underline-offset-2 hover:underline',
           paused
@@ -335,6 +393,58 @@ function Workflow({ project }: { project: Project }) {
         {paused ? 'Pausiert — wieder aufnehmen' : 'Projekt pausieren'}
       </button>
     </div>
+  );
+}
+
+/** Wo dieses Projekt im Tag, in der Woche und in der Saison auftaucht. */
+function ProjectLinks({ project }: { project: Project }) {
+  const { state } = useStore();
+  const t = today();
+  const week = weekDays(startOfWeek(t));
+  const tasks = state.tasks.filter((x) => x.projectId === project.id);
+  const area = state.areas.find((a) => a.id === project.areaId);
+  const seasonGoals = state.goals.filter(
+    (g) => g.areaId === project.areaId && g.horizon === 'season',
+  );
+
+  const rows: { label: string; value: string; to: 'heute' | 'woche' | 'saison' }[] = [
+    {
+      label: 'Heute',
+      value: `${tasks.filter((x) => x.date === t).length} Aufgaben eingeplant`,
+      to: 'heute',
+    },
+    {
+      label: 'Diese Woche',
+      value: `${tasks.filter((x) => x.date && week.includes(x.date)).length} Aufgaben verteilt`,
+      to: 'woche',
+    },
+    {
+      label: 'Saison',
+      value: seasonGoals.length
+        ? `${seasonGoals.length} Ziele in ${area?.title ?? 'diesem Bereich'}`
+        : 'kein Saisonziel im Bereich',
+      to: 'saison',
+    },
+  ];
+
+  return (
+    <ul className="divide-y rule">
+      {rows.map((r) => (
+        <li key={r.label} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
+          <span className="text-[0.88rem] text-ink-600 dark:text-paper-200/85">{r.label}</span>
+          <span className="flex items-center gap-4">
+            <span className="text-[0.83rem] text-ink-300 dark:text-paper-200/45">{r.value}</span>
+            <button
+              type="button"
+              onClick={() => navigate(r.to)}
+              className="text-[0.78rem] text-ink-300 underline-offset-2 hover:text-forest-600 hover:underline dark:hover:text-forest-300"
+            >
+              öffnen
+            </button>
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -563,6 +673,11 @@ function ProjectModal({ id, onClose }: { id: string | null; onClose: () => void 
         </div>
 
         <div className="border-t rule pt-5">
+          <p className="label mb-3">Verbindungen</p>
+          <ProjectLinks project={project} />
+        </div>
+
+        <div className="border-t rule pt-5">
           <p className="label mb-3">Bewertung</p>
           <Rating project={project} />
         </div>
@@ -605,29 +720,49 @@ export function Projects() {
   }, [state.projects]);
 
   const activeCount = grouped.get('active')?.length ?? 0;
+  const pipelineCount = state.projects.filter(
+    (p) => p.status !== 'active' && p.status !== 'done',
+  ).length;
   const overLimit = activeCount > ACTIVE_PROJECT_LIMIT;
+  const pipelineFull = pipelineCount > PIPELINE_LIMIT;
 
   return (
     <div>
       <PageHeader
         eyebrow="Inbox & Vorhaben"
         title="Projekte"
-        lead="Höchstens fünf aktive Projekte. Alles andere darf ruhen, ohne verloren zu gehen."
+        lead="Fünf Projekte laufen parallel, zwanzig warten in der Pipeline. Die fünf sind die Arbeit — die zwanzig sind das, was du dafür gerade nicht tust."
         aside={
-          <div className="text-right">
-            <p className="display text-3xl text-ink-700 dark:text-paper-100">
-              {activeCount}
-              <span className="text-ink-300"> / {ACTIVE_PROJECT_LIMIT}</span>
-            </p>
-            <p className="mt-1 text-[0.78rem] text-ink-300">aktiv</p>
+          <div className="flex gap-8 text-right">
+            <div>
+              <p className="display text-3xl text-ink-700 dark:text-paper-100">
+                {activeCount}
+                <span className="text-ink-300"> / {ACTIVE_PROJECT_LIMIT}</span>
+              </p>
+              <p className="mt-1 text-[0.78rem] text-ink-300">parallel</p>
+            </div>
+            <div>
+              <p className="display text-3xl text-ink-400 dark:text-paper-200/60">
+                {pipelineCount}
+                <span className="text-ink-300"> / {PIPELINE_LIMIT}</span>
+              </p>
+              <p className="mt-1 text-[0.78rem] text-ink-300">Pipeline</p>
+            </div>
           </div>
         }
       />
 
       {overLimit && (
-        <p className="mb-8 rounded-card border-l-2 border-l-brass-500 bg-paper-50 px-4 py-3 text-[0.88rem] leading-relaxed text-ink-500 dark:border-l-brass-300 dark:bg-ink-800 dark:text-paper-200/75">
-          Mehr als fünf aktive Projekte. Das ist kein Fehler — aber vielleicht darf eines
-          eine Weile pausieren.
+        <p className="mb-4 rounded-card border-l-2 border-l-brass-500 bg-paper-50 px-4 py-3 text-[0.88rem] leading-relaxed text-ink-500 dark:border-l-brass-300 dark:bg-ink-800 dark:text-paper-200/75">
+          Mehr als fünf Projekte laufen parallel. Das ist kein Fehler — aber die fünf
+          verlieren an Kraft, sobald es sechs werden.
+        </p>
+      )}
+
+      {pipelineFull && (
+        <p className="mb-8 rounded-card border-l-2 border-l-wine-500 bg-paper-50 px-4 py-3 text-[0.88rem] leading-relaxed text-ink-500 dark:border-l-wine-300 dark:bg-ink-800 dark:text-paper-200/75">
+          Die Pipeline führt {pipelineCount} Projekte. Zwanzig sind das ehrliche Maximum —
+          darüber wird sie zum Friedhof. Was davon darf endgültig gehen?
         </p>
       )}
 

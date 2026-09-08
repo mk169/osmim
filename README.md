@@ -20,12 +20,12 @@ npm run preview  # Build lokal ansehen
 
 | # | Seite | Zustand |
 |---|-------|---------|
-| 1 | **Heute** | voll funktionsfähig — Intention, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist), Attention-Check, Mini-Journal, Tagesabschluss |
-| 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, die 25/5-Liste, Anti-Vision, Fünf-Jahres-Phasen, „Nicht mein Maßstab“ — alles editierbar |
-| 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (30 Tage bis ein Jahr oder eigene Daten), Ziele mit optionalem Denkrahmen, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
-| 4 | **Bereiche** | voll funktionsfähig — neun Lebensbereiche mit Leitbild, 90-Tage-Fokus, Zielen, Gewohnheiten, Projekten, Notizen und Rückblick; dazu bereichseigene Ansichten (Klausuren, Praktikums-Pipeline, Trainingstagebuch, Kontakte, Glaubenspraxis, Sprachen & Bibliothek, Finanzen, Krakau) |
-| 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, Projekte mit Warum/Ergebnis/nächster physischer Handlung/Bewertung, **Workflow** (Idee → Erkunden → Aktiv → Abgeschlossen, Pause daneben) und **eigenen Aufgaben** je Projekt |
-| 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender mit anklickbaren, bearbeitbaren Terminen (Von/Bis, Notiz), Kapazitätsanzeige (max. drei anspruchsvolle Prioritäten pro Tag), Wochenreview mit fünf Fragen |
+| 1 | **Heute** | voll funktionsfähig — Termine des Tages, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist), Attention-Check, Mini-Journal |
+| 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, **Ziele am Horizont**, die 25/5-Liste, Anti-Vision, Phasen, „Nicht mein Maßstab“ — leeres Gerüst, alles selbst zu füllen |
+| 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (7, 14, 30, 60, 90 Tage, Halbjahr, Jahr oder eigene Daten), Ziele mit optionalem Denkrahmen, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
+| 4 | **Bereiche** | voll funktionsfähig — **frei anlegbar und löschbar**, jeder mit Leitbild, Fokus, Zielen, Gewohnheiten, Projekten, Prinzipien, Notizen und Rückblick; optionale Werkzeuge (Praxis, Protokoll, Menschen, Prüfungen, Bewerbungen, Bibliothek, Finanzen) statt fester Ansichten; Verlinkung zu Heute, Woche und Saison |
+| 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, **25/5** (fünf parallel, zwanzig in der Pipeline), Workflow mit Voraussetzungen je Stufe, eigene Aufgaben je Projekt, Verlinkung zu Heute, Woche und Saison |
+| 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender mit anklickbaren, bearbeitbaren Terminen (Von/Bis, Notiz), Kapazitätsanzeige, Wochenreview mit fünf Fragen, Einschätzung 1–10, Abschließen ins Archiv und **Verlauf über die Wochen** |
 | 7 | **Journal** | Vorlagen (Tages-Check-in, Wochenreview, Gebet, Ideen, emotionale Klärung), Volltextsuche, Tags, dezente Energie-/Stimmungsskala |
 | 8 | **Archiv** | abgeschlossene Projekte, frühere Wochen- und Monatsrückblicke, Bibliothek, „Leben erlebt“ |
 
@@ -72,10 +72,12 @@ Beim ersten Start ist die App ein **leeres Skelett**: die neun Bereiche und
 alle Seiten stehen bereit, Inhalte gibt es keine. Ziele, Projekte, Aufgaben,
 Termine, Kontakte, Gewohnheiten und Notizen trägst du selbst ein.
 
-Wer die App schon benutzt hat, behält seine Daten — der Browser-Speicher
-wird durch eine neue Fassung nicht überschrieben. Um bewusst beim leeren
-Skelett zu beginnen: **Daten & Sicherung → Auf Ausgangsfassung
-zurücksetzen** (vorher exportieren, falls etwas erhalten bleiben soll).
+Wer noch die Beispieldaten der ersten Fassung im Browser hatte, wird sie
+beim nächsten Öffnen los: eine einmalige Bereinigung entfernt genau die
+damaligen Beispieleinträge (erkennbar an ihren festen Kennungen) samt der
+Beispieltexte. Alles selbst Angelegte trägt eine Zufallskennung und bleibt
+unberührt. Wer trotzdem ganz von vorn beginnen will: **Daten & Sicherung →
+Auf Ausgangsfassung zurücksetzen**.
 
 ## Aufbau
 
