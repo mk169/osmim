@@ -71,14 +71,19 @@
     @apply border-ink-600/70 bg-ink-800;
   }
 
+  /*
+   * Eingabefelder tragen eine ruhige, aber sichtbare Kontur: sie stehen
+   * mal auf einer Karte, mal direkt auf der Seitenfläche — ohne Rahmen
+   * wären sie dort von gewöhnlichem Text nicht zu unterscheiden.
+   */
   .field {
-    @apply w-full rounded-card border border-transparent bg-paper-100/70 px-3 py-2 text-[0.95rem]
+    @apply w-full rounded-card border border-paper-300/80 bg-paper-100/70 px-3 py-2 text-[0.95rem]
       text-ink-700 placeholder:text-ink-300 transition-colors duration-200 ease-calm
-      hover:border-paper-300 focus:border-forest-300 focus:bg-paper-50;
+      hover:border-paper-400 focus:border-forest-300 focus:bg-paper-50;
   }
   .dark .field {
-    @apply bg-ink-900/50 text-paper-200 placeholder:text-ink-400
-      hover:border-ink-600 focus:border-forest-500 focus:bg-ink-900;
+    @apply border-ink-600/80 bg-ink-900/50 text-paper-200 placeholder:text-ink-400
+      hover:border-ink-500 focus:border-forest-500 focus:bg-ink-900;
   }
 
   .label {

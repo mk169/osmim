@@ -6,12 +6,12 @@ import { formatShort, today } from '../lib/date';
 
 const NAV: { route: Route; label: string; hint: string }[] = [
   { route: 'heute', label: 'Heute', hint: 'Der Tag, klein gehalten' },
-  { route: 'kompass', label: 'Kompass', hint: 'Identität und Richtung' },
+  { route: 'woche', label: 'Woche', hint: 'Kalender und Review' },
   { route: 'saison', label: 'Saison', hint: 'Zeitraum und Ziele' },
+  { route: 'journal', label: 'Journal', hint: 'Einträge und Vorlagen' },
   { route: 'bereiche', label: 'Bereiche', hint: 'Neun Lebensbereiche' },
   { route: 'projekte', label: 'Projekte', hint: 'Inbox und Vorhaben' },
-  { route: 'woche', label: 'Woche', hint: 'Kalender und Review' },
-  { route: 'journal', label: 'Journal', hint: 'Einträge und Vorlagen' },
+  { route: 'kompass', label: 'Kompass', hint: 'Identität und Richtung' },
   { route: 'archiv', label: 'Archiv', hint: 'Was gewesen ist' },
 ];
 
@@ -44,14 +44,18 @@ function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="flex w-full items-center justify-between rounded-card px-2 py-2 text-[0.82rem] text-ink-400 transition-colors duration-200 ease-calm hover:bg-paper-100 hover:text-ink-600 dark:text-paper-200/60 dark:hover:bg-ink-700/60 dark:hover:text-paper-100"
+      role="switch"
+      aria-checked={dark}
+      className="flex w-full items-center justify-between gap-3 rounded-card px-2 py-2 text-left text-[0.82rem] text-ink-400 transition-colors duration-200 ease-calm hover:bg-paper-100 hover:text-ink-600 dark:text-paper-200/60 dark:hover:bg-ink-700/60 dark:hover:text-paper-100"
     >
-      <span>{dark ? 'Nachtmodus' : 'Tagmodus'}</span>
+      <span>Nachtmodus</span>
       <span
         aria-hidden
         className={cx(
-          'relative h-4 w-8 rounded-full border transition-colors duration-300 ease-calm',
-          dark ? 'border-forest-300/60 bg-ink-700' : 'border-paper-400 bg-paper-200',
+          'relative h-4 w-8 shrink-0 rounded-full border transition-colors duration-300 ease-calm',
+          dark
+            ? 'border-forest-300/60 bg-forest-600/40'
+            : 'border-paper-400 bg-paper-200',
         )}
       >
         <span
