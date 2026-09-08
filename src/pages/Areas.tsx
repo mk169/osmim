@@ -27,7 +27,7 @@ import {
   ExamPanel,
   FaithPanel,
   FinancePanel,
-  KrakauPanel,
+  RoutinePanel,
   LanguagePanel,
   LibraryPanel,
 } from './areas/panels';
@@ -90,7 +90,11 @@ function AreaOverview() {
                 </h2>
               </div>
               <p className="mb-5 text-[0.9rem] leading-relaxed text-ink-400 dark:text-paper-200/60">
-                {area.focus}
+                {area.focus || (
+                  <span className="text-ink-300 dark:text-paper-200/40">
+                    Noch kein Fokus gesetzt.
+                  </span>
+                )}
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.76rem] text-ink-300 dark:text-paper-200/40">
                 <span>{goals.length} Ziele</span>
@@ -155,6 +159,7 @@ function AreaDetail({ id }: { id: AreaKey }) {
         <p className="label mb-2">Leitbild</p>
         <InlineEdit
           value={area.creed}
+          placeholder="Wofür steht dieser Bereich in deinem Leben?"
           onSave={(v) => patchArea({ creed: v })}
           displayClassName="display text-xl leading-snug sm:text-2xl"
           className="-mx-2"
@@ -163,6 +168,7 @@ function AreaDetail({ id }: { id: AreaKey }) {
           <p className="label mb-2">90-Tage-Fokus</p>
           <InlineEdit
             value={area.focus}
+            placeholder="Was soll hier in diesem Zeitraum gelingen?"
             onSave={(v) => patchArea({ focus: v })}
             displayClassName="text-[0.95rem] leading-relaxed"
             className="-mx-2"
@@ -190,7 +196,7 @@ function AreaDetail({ id }: { id: AreaKey }) {
       {id === 'daily' && (
         <div className="mb-8 space-y-4">
           <FinancePanel />
-          <KrakauPanel />
+          <RoutinePanel />
         </div>
       )}
 

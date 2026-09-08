@@ -71,8 +71,11 @@ export function laneTasks(state: AppState, date: DateISO, lane: TaskLane): Task[
   return state.tasks.filter((t) => t.date === date && t.lane === lane && !t.isOneThing);
 }
 
-/** Höchstens drei Aufgaben pro Tag — der Rest bleibt in der Inbox. */
-export const DAY_TASK_LIMIT = 3;
+/**
+ * Drei Aufgaben sind die Empfehlung, keine Schranke: über dieser Zahl
+ * erscheint ein leiser Hinweis, eingetragen werden darf weiter.
+ */
+export const DAY_TASK_HINT = 3;
 
 export function dayTaskCount(state: AppState, date: DateISO): number {
   return state.tasks.filter((t) => t.date === date && !t.isOneThing).length;

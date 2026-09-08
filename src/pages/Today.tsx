@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store/store';
 import {
-  DAY_TASK_LIMIT,
+  DAY_TASK_HINT,
   addInbox,
   addTask,
   dayTaskCount,
@@ -40,7 +40,7 @@ function LaneCard({ lane, date }: { lane: TaskLane; date: string }) {
   const { state, update } = useStore();
   const tasks = laneTasks(state, date, lane);
   const count = dayTaskCount(state, date);
-  const full = count >= DAY_TASK_LIMIT;
+  const many = count > DAY_TASK_HINT;
 
   return (
     <Card className="flex flex-col">
@@ -77,26 +77,25 @@ function LaneCard({ lane, date }: { lane: TaskLane; date: string }) {
       </div>
 
       <div className="mt-4 border-t rule pt-3">
-        {full ? (
-          <p className="text-[0.78rem] leading-relaxed text-ink-300 dark:text-paper-200/45">
-            Drei Aufgaben genügen für heute.{' '}
+        <QuickAdd
+          placeholder="Eine Sache …"
+          buttonLabel="+"
+          onAdd={(title) =>
+            update((s) => addTask(s, { title, lane, date, areaId: undefined }))
+          }
+        />
+        {many && (
+          <p className="mt-2 text-[0.76rem] leading-relaxed text-ink-300 dark:text-paper-200/45">
+            {count} Aufgaben heute. Geht — aber was davon darf{' '}
             <button
               type="button"
               onClick={() => navigate('projekte')}
               className="underline decoration-paper-400 underline-offset-2 hover:text-ink-500 dark:hover:text-paper-100"
             >
-              Weiteres in die Inbox
+              warten
             </button>
-            .
+            ?
           </p>
-        ) : (
-          <QuickAdd
-            placeholder="Eine Sache …"
-            buttonLabel="+"
-            onAdd={(title) =>
-              update((s) => addTask(s, { title, lane, date, areaId: undefined }))
-            }
-          />
         )}
       </div>
     </Card>

@@ -10,12 +10,16 @@ import {
   patchProject,
   removeInbox,
   removeProject,
+  patchTask,
+  removeTask,
+  toggleTask,
 } from '../store/actions';
 import type { AreaKey, InboxItem, Project, ProjectStatus } from '../types';
 import { INBOX_KIND, PROJECT_STATUS, PROJECT_STATUS_ORDER, options } from '../lib/labels';
 import {
   AutoTextarea,
   Card,
+  Checkbox,
   DeleteButton,
   Empty,
   InlineEdit,
@@ -23,6 +27,7 @@ import {
   PageHeader,
   Pill,
   QuickAdd,
+  QuietLine,
   SectionTitle,
   Select,
   TextField,
@@ -259,9 +264,159 @@ function Rating({ project }: { project: Project }) {
   );
 }
 
+/**
+ * Der Weg eines Projekts. „Pausiert" liegt bewusst neben der Reihe —
+ * eine Pause ist kein Rückschritt, sondern eine Entscheidung.
+ */
+const FLOW: ProjectStatus[] = ['idea', 'exploring', 'active', 'done'];
+
+function Workflow({ project }: { project: Project }) {
+  const { update } = useStore();
+  const paused = project.status === 'paused';
+  const currentIndex = FLOW.indexOf(project.status);
+
+  const setStatus = (status: ProjectStatus) =>
+    update((s) =>
+      patchProject(s, project.id, {
+        status,
+        archivedAt: status === 'done' ? new Date().toISOString() : undefined,
+      }),
+    );
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
+        {FLOW.map((step, i) => {
+          const reached = !paused && currentIndex >= i;
+          const isCurrent = !paused && currentIndex === i;
+          return (
+            <div key={step} className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setStatus(step)}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={cx(
+                  'rounded-full border px-3 py-1 text-[0.8rem] transition-colors duration-200 ease-calm',
+                  isCurrent
+                    ? 'border-forest-500 bg-forest-500 text-paper-50 dark:border-forest-300 dark:bg-forest-300 dark:text-ink-800'
+                    : reached
+                      ? 'border-forest-300 text-forest-600 dark:border-forest-500 dark:text-forest-300'
+                      : 'border-paper-300 text-ink-300 hover:border-ink-300 hover:text-ink-500 dark:border-ink-600 dark:hover:border-ink-500 dark:hover:text-paper-200/80',
+                )}
+              >
+                {PROJECT_STATUS[step]}
+              </button>
+              {i < FLOW.length - 1 && (
+                <span
+                  aria-hidden
+                  className={cx(
+                    'h-px w-4',
+                    reached && currentIndex > i
+                      ? 'bg-forest-300 dark:bg-forest-500'
+                      : 'bg-paper-300 dark:bg-ink-600',
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setStatus(paused ? 'active' : 'paused')}
+        className={cx(
+          'mt-3 text-[0.78rem] underline-offset-2 hover:underline',
+          paused
+            ? 'text-brass-500 dark:text-brass-300'
+            : 'text-ink-300 hover:text-ink-500 dark:hover:text-paper-100',
+        )}
+      >
+        {paused ? 'Pausiert — wieder aufnehmen' : 'Projekt pausieren'}
+      </button>
+    </div>
+  );
+}
+
+/** Aufgaben, die zu genau diesem Projekt gehören. */
+function ProjectTasks({ project }: { project: Project }) {
+  const { state, update } = useStore();
+  const tasks = state.tasks.filter((t) => t.projectId === project.id);
+  const done = tasks.filter((t) => t.done).length;
+
+  return (
+    <div>
+      <div className="mb-3 flex items-baseline justify-between gap-4">
+        <p className="label">Aufgaben</p>
+        {tasks.length > 0 && (
+          <span className="text-[0.78rem] tabular-nums text-ink-300">
+            {done} von {tasks.length}
+          </span>
+        )}
+      </div>
+
+      {tasks.length > 0 && (
+        <div className="mb-3">
+          <QuietLine value={tasks.length ? (done / tasks.length) * 100 : 0} />
+        </div>
+      )}
+
+      {tasks.length === 0 ? (
+        <p className="mb-3 text-[0.88rem] text-ink-300 dark:text-paper-200/45">
+          Noch keine Aufgabe. Die erste ist meist die kleinste.
+        </p>
+      ) : (
+        <ul className="-mx-2 mb-3 space-y-0.5">
+          {tasks.map((t) => (
+            <li key={t.id} className="group relative">
+              <Checkbox
+                checked={t.done}
+                onChange={() => update((s) => toggleTask(s, t.id))}
+                label={t.title}
+                hint={t.date ? 'für heute eingeplant' : undefined}
+              />
+              <div className="absolute right-1 top-1.5 flex items-center gap-1">
+                {!t.date && !t.done && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update((s) =>
+                        patchTask(s, t.id, { date: today(), lane: t.lane ?? 'duty' }),
+                      )
+                    }
+                    className="rounded px-1.5 py-0.5 text-[0.72rem] text-ink-300 opacity-0 transition-opacity hover:text-forest-600 group-hover:opacity-100 dark:hover:text-forest-300"
+                  >
+                    heute
+                  </button>
+                )}
+                <DeleteButton
+                  label="Aufgabe entfernen"
+                  onDelete={() => update((s) => removeTask(s, t.id))}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <QuickAdd
+        placeholder="Aufgabe für dieses Projekt …"
+        buttonLabel="+"
+        onAdd={(title) =>
+          update((s) =>
+            addTask(s, { title, projectId: project.id, areaId: project.areaId, lane: 'duty' }),
+          )
+        }
+      />
+    </div>
+  );
+}
+
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
   const { state, update } = useStore();
   const area = state.areas.find((a) => a.id === project.areaId);
+  const tasks = state.tasks.filter((t) => t.projectId === project.id);
+  const doneTasks = tasks.filter((t) => t.done).length;
 
   return (
     <li
@@ -304,6 +459,15 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-400 dark:text-paper-200/60">
           {project.why}
         </p>
+      )}
+
+      {tasks.length > 0 && (
+        <div className="mt-4 flex items-center gap-3">
+          <QuietLine value={(doneTasks / tasks.length) * 100} />
+          <span className="shrink-0 text-[0.76rem] tabular-nums text-ink-300">
+            {doneTasks}/{tasks.length} Aufgaben
+          </span>
+        </div>
       )}
 
       <div className="mt-4 border-t rule pt-3">
@@ -374,18 +538,12 @@ function ProjectModal({ id, onClose }: { id: string | null; onClose: () => void 
           onChange={(e) => patch({ nextAction: e.target.value })}
         />
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Select
             label="Bereich"
             value={project.areaId}
             onChange={(v) => patch({ areaId: v as AreaKey })}
             options={state.areas.map((a) => ({ value: a.id, label: a.title }))}
-          />
-          <Select
-            label="Status"
-            value={project.status}
-            onChange={(v) => patch({ status: v as ProjectStatus })}
-            options={options(PROJECT_STATUS)}
           />
           <TextField
             label="Zeitrahmen"
@@ -393,6 +551,15 @@ function ProjectModal({ id, onClose }: { id: string | null; onClose: () => void 
             placeholder="z. B. diese Saison"
             onChange={(e) => patch({ timeframe: e.target.value })}
           />
+        </div>
+
+        <div className="border-t rule pt-5">
+          <p className="label mb-3">Workflow</p>
+          <Workflow project={project} />
+        </div>
+
+        <div className="border-t rule pt-5">
+          <ProjectTasks project={project} />
         </div>
 
         <div className="border-t rule pt-5">

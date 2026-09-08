@@ -20,14 +20,23 @@ npm run preview  # Build lokal ansehen
 
 | # | Seite | Zustand |
 |---|-------|---------|
-| 1 | **Heute** | voll funktionsfähig — Intention, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist, max. drei Aufgaben), Attention-Check, Mini-Journal, Tagesabschluss |
+| 1 | **Heute** | voll funktionsfähig — Intention, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist), Attention-Check, Mini-Journal, Tagesabschluss |
 | 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, die 25/5-Liste, Anti-Vision, Fünf-Jahres-Phasen, „Nicht mein Maßstab“ — alles editierbar |
 | 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (30 Tage bis ein Jahr oder eigene Daten), Ziele mit optionalem Denkrahmen, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
 | 4 | **Bereiche** | voll funktionsfähig — neun Lebensbereiche mit Leitbild, 90-Tage-Fokus, Zielen, Gewohnheiten, Projekten, Notizen und Rückblick; dazu bereichseigene Ansichten (Klausuren, Praktikums-Pipeline, Trainingstagebuch, Kontakte, Glaubenspraxis, Sprachen & Bibliothek, Finanzen, Krakau) |
-| 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, Projekte mit Warum/Ergebnis/nächster physischer Handlung/Bewertung, Grenze von fünf aktiven Projekten |
+| 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, Projekte mit Warum/Ergebnis/nächster physischer Handlung/Bewertung, **Workflow** (Idee → Erkunden → Aktiv → Abgeschlossen, Pause daneben) und **eigenen Aufgaben** je Projekt |
 | 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender mit anklickbaren, bearbeitbaren Terminen (Von/Bis, Notiz), Kapazitätsanzeige (max. drei anspruchsvolle Prioritäten pro Tag), Wochenreview mit fünf Fragen |
 | 7 | **Journal** | Vorlagen (Tages-Check-in, Wochenreview, Gebet, Ideen, emotionale Klärung), Volltextsuche, Tags, dezente Energie-/Stimmungsskala |
 | 8 | **Archiv** | abgeschlossene Projekte, frühere Wochen- und Monatsrückblicke, Bibliothek, „Leben erlebt“ |
+
+## Aufgaben
+
+Aufgaben sind nicht begrenzt. Drei pro Tag bleiben die Empfehlung — ab der
+vierten erscheint ein leiser Hinweis mit der Frage, was warten darf, aber
+eintragen lässt sich, so viel du willst.
+
+Projektaufgaben leben im Projekt und lassen sich von dort mit einem Klick
+für heute einplanen; sie erscheinen dann in der Tagesansicht.
 
 ## Ziele und Denkrahmen
 
@@ -59,9 +68,14 @@ Seitenspalte lässt sich der gesamte Zustand als lesbares JSON exportieren und
 wieder importieren; beim Import ergänzt eine Migration fehlende Felder, sodass
 ältere Backups weiter funktionieren.
 
-Beim ersten Start werden Seed-Daten geladen: alle neun Bereiche, die
-Saisonziele, sechs Klausuren, Projekte, Kontakte, Gewohnheiten und ein
-Beispielkalender.
+Beim ersten Start ist die App ein **leeres Skelett**: die neun Bereiche und
+alle Seiten stehen bereit, Inhalte gibt es keine. Ziele, Projekte, Aufgaben,
+Termine, Kontakte, Gewohnheiten und Notizen trägst du selbst ein.
+
+Wer die App schon benutzt hat, behält seine Daten — der Browser-Speicher
+wird durch eine neue Fassung nicht überschrieben. Um bewusst beim leeren
+Skelett zu beginnen: **Daten & Sicherung → Auf Ausgangsfassung
+zurücksetzen** (vorher exportieren, falls etwas erhalten bleiben soll).
 
 ## Aufbau
 

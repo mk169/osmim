@@ -227,6 +227,7 @@ export function Season() {
         <p className="label mb-3">Worum es diese Saison geht</p>
         <InlineEdit
           value={state.season.statement}
+          placeholder="Worum geht es in diesem Zeitraum? Ein Satz genügt."
           onSave={(v) =>
             update((s) => ({ ...s, season: { ...s.season, statement: v } }))
           }

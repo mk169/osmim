@@ -450,55 +450,85 @@ export function LibraryPanel({ compact }: { compact?: boolean }) {
 
 export function LanguagePanel() {
   const { state, update } = useStore();
-  const habit = state.habits.find((h) => h.title.includes('Italienisch'));
   const t = today();
-  const doneToday = habit?.log.includes(t) ?? false;
+  const habits = state.habits.filter((h) => h.areaId === 'culture');
 
   return (
     <Card>
-      <SectionTitle>Sprachen</SectionTitle>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4 border-b rule pb-4">
-          <div>
-            <p className="text-[0.98rem] text-ink-700 dark:text-paper-100">Italienisch</p>
-            <p className="text-[0.84rem] text-ink-300 dark:text-paper-200/50">
-              Aktive Sprache · zehn Minuten täglich
-            </p>
-          </div>
-          {habit && (
-            <button
-              type="button"
-              onClick={() =>
-                update((s) => ({
-                  ...s,
-                  habits: s.habits.map((h) =>
-                    h.id === habit.id
-                      ? {
-                          ...h,
-                          log: doneToday
-                            ? h.log.filter((d) => d !== t)
-                            : [...h.log, t].sort(),
-                        }
-                      : h,
-                  ),
-                }))
-              }
-              className={cx('btn', doneToday ? 'btn-solid' : 'btn-quiet')}
-            >
-              {doneToday ? 'Heute gemacht' : 'Heute machen'}
-            </button>
-          )}
-        </div>
-        <div className="space-y-2 text-[0.9rem] text-ink-400 dark:text-paper-200/60">
-          <p className="text-ink-300 dark:text-paper-200/45">Später, ohne Eile:</p>
-          <p>Französisch · Spanisch · vertieftes Englisch</p>
-        </div>
-        <div className="border-t rule pt-4">
-          <p className="label mb-2">Lernpfade</p>
-          <p className="text-[0.9rem] leading-relaxed text-ink-400 dark:text-paper-200/60">
-            Rhetorik · Grammatik · Trivium · Allgemeinwissen
-          </p>
-        </div>
+      <SectionTitle>Tägliche Praxis</SectionTitle>
+      <p className="mb-4 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+        Sprache, Lesen, Hören — eine kleine Übung am Tag trägt weiter als ein
+        großer Vorsatz. Lege hier an, was täglich stattfinden soll.
+      </p>
+
+      {habits.length === 0 ? (
+        <Empty
+          title="Noch keine Praxis"
+          text="Zehn Minuten Sprache oder zwanzig Seiten lesen — klein genug, dass es auch an schlechten Tagen geht."
+        />
+      ) : (
+        <ul className="divide-y rule">
+          {habits.map((h) => {
+            const done = h.log.includes(t);
+            return (
+              <li
+                key={h.id}
+                className="group flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+              >
+                <span className="min-w-0 text-[0.94rem] text-ink-600 dark:text-paper-200/85">
+                  {h.title}
+                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update((s) => ({
+                        ...s,
+                        habits: s.habits.map((x) =>
+                          x.id === h.id
+                            ? {
+                                ...x,
+                                log: done
+                                  ? x.log.filter((d) => d !== t)
+                                  : [...x.log, t].sort(),
+                              }
+                            : x,
+                        ),
+                      }))
+                    }
+                    className={cx('btn', done ? 'btn-solid' : 'btn-quiet')}
+                  >
+                    Heute
+                  </button>
+                  <DeleteButton
+                    label={`„${h.title}“ entfernen`}
+                    onDelete={() =>
+                      update((s) => ({
+                        ...s,
+                        habits: s.habits.filter((x) => x.id !== h.id),
+                      }))
+                    }
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="mt-5 border-t rule pt-4">
+        <QuickAdd
+          placeholder="Tägliche Übung …"
+          onAdd={(title) =>
+            update((s) => ({
+              ...s,
+              habits: [
+                ...s.habits,
+                { id: newId('habit'), title, areaId: 'culture', cadence: 'daily', log: [] },
+              ],
+            }))
+          }
+        />
       </div>
     </Card>
   );
@@ -637,54 +667,30 @@ export function FinancePanel() {
   );
 }
 
-export function KrakauPanel() {
+export function RoutinePanel() {
   const { state, update } = useStore();
-  const project = state.projects.find((p) => p.id === 'proj_krakau');
   const area = state.areas.find((a) => a.id === 'daily');
+  if (!area) return null;
 
   return (
     <Card>
-      <SectionTitle>Krakau & Reisenotizen</SectionTitle>
-      {project ? (
-        <div className="space-y-3">
-          <p className="text-[0.95rem] text-ink-600 dark:text-paper-200/85">{project.outcome}</p>
-          <div className="-mx-2">
-            <InlineEdit
-              value={project.nextAction}
-              placeholder="Nächste Handlung …"
-              onSave={(v) =>
-                update((s) => ({
-                  ...s,
-                  projects: s.projects.map((p) =>
-                    p.id === project.id ? { ...p, nextAction: v } : p,
-                  ),
-                }))
-              }
-              displayClassName="text-[0.9rem] text-forest-600 dark:text-forest-300"
-            />
-          </div>
-        </div>
-      ) : (
-        <p className="text-[0.9rem] text-ink-300">Kein Reiseprojekt angelegt.</p>
-      )}
-      {area && (
-        <div className="mt-5 border-t rule pt-4">
-          <p className="label mb-2">Haushaltsroutinen</p>
-          <div className="-mx-2">
-            <InlineEdit
-              value={area.extra}
-              placeholder="Wiederkehrende Routinen …"
-              onSave={(v) =>
-                update((s) => ({
-                  ...s,
-                  areas: s.areas.map((a) => (a.id === 'daily' ? { ...a, extra: v } : a)),
-                }))
-              }
-              displayClassName="text-[0.9rem]"
-            />
-          </div>
-        </div>
-      )}
+      <SectionTitle>Routinen & Reisen</SectionTitle>
+      <p className="mb-3 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+        Was regelmäßig wiederkehrt und was ansteht — Wäsche, Papiere, Zahlungen,
+        eine Reise. Aufgeschrieben muss es nicht mehr erinnert werden.
+      </p>
+      <InlineEdit
+        value={area.extra}
+        placeholder="Wäsche montags. Zimmer freitags. Papiere am Monatsanfang …"
+        onSave={(v) =>
+          update((s) => ({
+            ...s,
+            areas: s.areas.map((a) => (a.id === 'daily' ? { ...a, extra: v } : a)),
+          }))
+        }
+        className="-mx-2 min-h-[5rem]"
+        displayClassName="text-[0.92rem] leading-relaxed"
+      />
     </Card>
   );
 }
@@ -793,6 +799,12 @@ export function FaithPanel() {
         Hier wird nichts gezählt und nichts bewertet. Nur eine sanfte Erinnerung,
         dass es diese Dinge gibt.
       </p>
+      {habits.length === 0 && (
+        <p className="mb-4 text-[0.9rem] text-ink-300 dark:text-paper-200/45">
+          Noch nichts eingetragen. Gebet, Messe, Lektüre, Dankbarkeit — was davon
+          gehört zu deinem Tag?
+        </p>
+      )}
       <ul className="space-y-1">
         {habits.map((h) => {
           const done = h.log.includes(t);
@@ -827,11 +839,19 @@ export function FaithPanel() {
           );
         })}
       </ul>
-      <div className="mt-5 space-y-2 border-t rule pt-4 text-[0.9rem] text-ink-400 dark:text-paper-200/60">
-        <p>Messe · Beichte · geistliche Lektüre · Dankbarkeit</p>
-        <p className="italic text-ink-300 dark:text-paper-200/45">
-          „Unruhig ist unser Herz, bis es ruht in dir.“
-        </p>
+      <div className="mt-5 border-t rule pt-4">
+        <QuickAdd
+          placeholder="Was gehört zu deiner Praxis?"
+          onAdd={(title) =>
+            update((s) => ({
+              ...s,
+              habits: [
+                ...s.habits,
+                { id: newId('habit'), title, areaId: 'faith', cadence: 'daily', log: [] },
+              ],
+            }))
+          }
+        />
       </div>
     </Card>
   );

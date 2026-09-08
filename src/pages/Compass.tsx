@@ -63,6 +63,7 @@ export function Compass() {
         <p className="label mb-4">Leitbild</p>
         <InlineEdit
           value={c.creed}
+          placeholder="Wer willst du sein? Ein Satz, den du auch in fünf Jahren noch unterschreiben würdest."
           onSave={(v) => patch({ creed: v })}
           displayClassName="display text-2xl leading-[1.35] sm:text-[1.9rem]"
           className="-mx-2"
@@ -71,6 +72,11 @@ export function Compass() {
 
       <section className="mb-12">
         <SectionTitle>Persönliche Werte</SectionTitle>
+        {c.values.length === 0 && (
+          <p className="mb-4 text-[0.9rem] text-ink-300 dark:text-paper-200/45">
+            Noch keine Werte notiert. Sechs bis acht genügen für ein ganzes Leben.
+          </p>
+        )}
         <div className="mb-4 flex flex-wrap gap-2">
           {c.values.map((v, i) => (
             <span
@@ -99,6 +105,12 @@ export function Compass() {
         <p className="mb-5 max-w-xl text-[0.9rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
           Nicht Menschen, die man beneidet — Eigenschaften, die man üben kann.
         </p>
+        {c.qualities.length === 0 && (
+          <p className="mb-4 text-[0.9rem] text-ink-300 dark:text-paper-200/45">
+            Noch keine Qualitäten. Denk an Menschen, die du bewunderst — und
+            benenne, was sie können, nicht was sie haben.
+          </p>
+        )}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {c.qualities.map((q, i) => (
             <article
@@ -169,6 +181,12 @@ export function Compass() {
         <p className="mb-6 max-w-xl text-[0.9rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
           Grobe Phasen, kein starrer Plan. Die Reihenfolge zählt mehr als die Jahreszahlen.
         </p>
+        {c.phases.length === 0 && (
+          <p className="mb-4 text-[0.9rem] text-ink-300 dark:text-paper-200/45">
+            Noch keine Phasen. Vier grobe Etappen reichen — die Reihenfolge zählt
+            mehr als die Jahreszahlen.
+          </p>
+        )}
         <ol className="relative space-y-0">
           {c.phases.map((p, i) => (
             <li key={p.id} className="relative flex gap-6 pb-8 last:pb-0">
@@ -211,6 +229,24 @@ export function Compass() {
             </li>
           ))}
         </ol>
+        <div className="mt-4 max-w-sm">
+          <QuickAdd
+            placeholder="Eine weitere Phase …"
+            onAdd={(title) =>
+              patch({
+                phases: [
+                  ...c.phases,
+                  {
+                    id: `phase_${Date.now().toString(36)}`,
+                    label: `Etappe ${c.phases.length + 1}`,
+                    title,
+                    text: '',
+                  },
+                ],
+              })
+            }
+          />
+        </div>
       </section>
 
       <section>
