@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store/store';
-import { patchGoal, newId } from '../store/actions';
+import {
+  SEASON_ACTIVE_LIMIT,
+  SEASON_DEFAULT_DAYS,
+  SEASON_POOL_LIMIT,
+  newId,
+  patchGoal,
+} from '../store/actions';
 import { GOAL_FRAMEWORK, GOAL_STATUS } from '../lib/labels';
 import { GoalModal } from '../components/GoalModal';
 import {
@@ -109,6 +115,16 @@ function GoalRow({ id, onOpen }: { id: string; onOpen: () => void }) {
           {goal.progress}%
         </span>
       </div>
+
+      <div className="mt-4 border-t rule pt-3">
+        <button
+          type="button"
+          onClick={() => update((s) => patchGoal(s, goal.id, { chosen: false }))}
+          className="text-[0.78rem] text-ink-300 underline-offset-2 hover:text-ink-500 hover:underline dark:hover:text-paper-100"
+        >
+          zurück auf die Liste
+        </button>
+      </div>
     </li>
   );
 }
@@ -201,6 +217,9 @@ export function Season() {
   const [openGoal, setOpenGoal] = useState<string | null>(null);
 
   const seasonGoals = state.goals.filter((g) => g.horizon === 'season');
+  const chosen = seasonGoals.filter((g) => g.chosen);
+  const pool = seasonGoals.filter((g) => !g.chosen);
+  const full = chosen.length >= SEASON_ACTIVE_LIMIT;
   const total = Math.max(1, daysBetween(state.season.startDate, state.season.endDate));
   const done = Math.max(0, Math.min(total, daysBetween(state.season.startDate, t)));
 
@@ -216,7 +235,7 @@ export function Season() {
       <PageHeader
         eyebrow={`${state.season.title} · ${formatShort(state.season.startDate)} – ${formatShort(state.season.endDate)}`}
         title="Saison"
-        lead="Ein Zeitraum, den du überblicken kannst — dreißig Tage oder ein ganzes Jahr. Drei bis vier Ziele darin, nicht mehr."
+        lead="Sechzig Tage sind lang genug, um etwas zu bewegen, und kurz genug, um sie zu überblicken. Fünf Ziele laufen darin parallel — der Rest wartet auf der Liste."
         aside={<SeasonArc done={done} total={total} />}
       />
 
@@ -238,25 +257,108 @@ export function Season() {
       <section className="mb-12">
         <SectionTitle
           right={
-            <span className="text-[0.78rem] text-ink-300">
-              {seasonGoals.length} von idealerweise 4
+            <span className="text-[0.78rem] tabular-nums text-ink-300">
+              {chosen.length}/{SEASON_ACTIVE_LIMIT} parallel · {seasonGoals.length}/
+              {SEASON_POOL_LIMIT} auf der Liste
             </span>
           }
         >
-          Saisonziele
+          Die fünf
         </SectionTitle>
 
-        {seasonGoals.length === 0 ? (
+        <p className="mb-5 max-w-xl text-[0.9rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+          Fünf Ziele laufen parallel — alles Weitere wartet unten auf der Liste.
+          Jedes davon soll in {SEASON_DEFAULT_DAYS} Tagen machbar sein: was länger
+          braucht, gehört in den Kompass und wird später zum Saisonziel.
+        </p>
+
+        {chosen.length === 0 ? (
           <Empty
-            title="Noch keine Saisonziele"
-            text="Drei bis vier Vorhaben genügen. Was soll in neunzig Tagen anders sein?"
+            title="Noch keines der fünf gewählt"
+            text="Schreib erst auf, was ansteht. Dann hol fünf davon nach oben — mehr laufen nicht gleichzeitig."
           />
         ) : (
           <ul className="space-y-3">
-            {seasonGoals.map((g) => (
+            {chosen.map((g) => (
               <GoalRow key={g.id} id={g.id} onOpen={() => setOpenGoal(g.id)} />
             ))}
           </ul>
+        )}
+
+        {full && (
+          <p className="mt-4 text-[0.83rem] text-ink-300 dark:text-paper-200/45">
+            Fünf sind belegt. Um etwas von der Liste hochzuholen, lege zuerst eines
+            der fünf zurück.
+          </p>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <SectionTitle
+          right={
+            <span className="text-[0.78rem] tabular-nums text-ink-300">
+              {pool.length} {pool.length === 1 ? 'Ziel' : 'Ziele'}
+            </span>
+          }
+        >
+          Die Liste
+        </SectionTitle>
+
+        <p className="mb-4 max-w-xl text-[0.9rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
+          Bis zu {SEASON_POOL_LIMIT} Ziele für diesen Zeitraum. Sie sind nicht
+          vergessen — sie sind nur nicht jetzt.
+        </p>
+
+        {pool.length === 0 ? (
+          <Empty
+            title="Die Liste ist leer"
+            text="Schreib alles auf, was in diesem Zeitraum möglich wäre — ungefiltert. Ausgewählt wird danach."
+          />
+        ) : (
+          <Card>
+            <ul className="divide-y rule">
+              {pool.map((g) => {
+                const area = state.areas.find((a) => a.id === g.areaId);
+                return (
+                  <li key={g.id} className="group flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <button
+                      type="button"
+                      onClick={() => setOpenGoal(g.id)}
+                      className="min-w-0 flex-1 text-left text-[0.93rem] text-ink-600 hover:underline hover:decoration-paper-400 hover:underline-offset-4 dark:text-paper-200/85"
+                    >
+                      {g.title}
+                    </button>
+                    {area && <Pill tone="muted">{area.letter}</Pill>}
+                    <button
+                      type="button"
+                      disabled={full}
+                      title={
+                        full
+                          ? 'Fünf laufen bereits parallel.'
+                          : 'Zu den fünf hochholen'
+                      }
+                      onClick={() => update((s) => patchGoal(s, g.id, { chosen: true }))}
+                      className={cx(
+                        'shrink-0 text-[0.78rem] underline-offset-2',
+                        full
+                          ? 'cursor-default text-ink-300/50 dark:text-paper-200/25'
+                          : 'text-ink-300 hover:text-forest-600 hover:underline dark:hover:text-forest-300',
+                      )}
+                    >
+                      hochholen
+                    </button>
+                    <DeleteButton
+                      label="Ziel entfernen"
+                      confirm={`„${g.title}“ löschen?`}
+                      onDelete={() =>
+                        update((s) => ({ ...s, goals: s.goals.filter((x) => x.id !== g.id) }))
+                      }
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
         )}
 
         <p className="mt-4 text-[0.83rem] text-ink-300 dark:text-paper-200/45">
@@ -265,26 +367,35 @@ export function Season() {
         </p>
 
         <div className="mt-3">
-          <QuickAdd
-            placeholder="Ein weiteres Saisonziel …"
-            onAdd={(title) =>
-              update((s) => ({
-                ...s,
-                goals: [
-                  ...s.goals,
-                  {
-                    id: newId('goal'),
-                    title,
-                    areaId: 'attention',
-                    horizon: 'season',
-                    status: 'open',
-                    progress: 0,
-                    createdAt: new Date().toISOString(),
-                  },
-                ],
-              }))
-            }
-          />
+          {seasonGoals.length >= SEASON_POOL_LIMIT ? (
+            <p className="text-[0.85rem] leading-relaxed text-ink-400 dark:text-paper-200/60">
+              Fünfundzwanzig Ziele stehen auf der Liste. Das ist genug für
+              {' '}{SEASON_DEFAULT_DAYS} Tage — streiche eines, bevor du eines
+              hinzufügst.
+            </p>
+          ) : (
+            <QuickAdd
+              placeholder={`Was ist in ${SEASON_DEFAULT_DAYS} Tagen machbar?`}
+              onAdd={(title) =>
+                update((s) => ({
+                  ...s,
+                  goals: [
+                    ...s.goals,
+                    {
+                      id: newId('goal'),
+                      title,
+                      areaId: s.areas[0]?.id ?? '',
+                      horizon: 'season',
+                      status: 'open',
+                      progress: 0,
+                      chosen: false,
+                      createdAt: new Date().toISOString(),
+                    },
+                  ],
+                }))
+              }
+            />
+          )}
         </div>
       </section>
 
@@ -333,7 +444,7 @@ export function Season() {
         <Card>
           <SectionTitle>„Nicht jetzt“</SectionTitle>
           <p className="mb-4 text-[0.85rem] leading-relaxed text-ink-300 dark:text-paper-200/50">
-            Bewusst zurückgestellt. Nicht verworfen — nur nicht in diesen neunzig Tagen.
+            Bewusst zurückgestellt. Nicht verworfen — nur nicht in diesem Zeitraum.
           </p>
           <ul className="mb-4 space-y-1">
             {state.season.notNow.map((item, i) => (

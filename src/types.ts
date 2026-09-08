@@ -70,6 +70,11 @@ export interface Goal {
   status: GoalStatus;
   /** 0–100, bewusst grob und ohne Punktesystem. */
   progress: number;
+  /**
+   * Eines der fünf Ziele, die parallel laufen. Alles andere wartet in der
+   * Liste — 25/5 auf Saisonebene.
+   */
+  chosen?: boolean;
   framework?: GoalFramework;
   /**
    * Antworten auf die Felder des gewählten Rahmens, nach Feldschlüssel.

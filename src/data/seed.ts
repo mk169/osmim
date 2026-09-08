@@ -145,7 +145,7 @@ export function createSeedState(): AppState {
       title: 'Erste Saison',
       statement: '',
       startDate: t,
-      endDate: addDays(t, 90),
+      endDate: addDays(t, 60),
       milestones: [],
       notNow: [],
     },

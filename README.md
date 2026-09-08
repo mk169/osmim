@@ -22,7 +22,7 @@ npm run preview  # Build lokal ansehen
 |---|-------|---------|
 | 1 | **Heute** | voll funktionsfähig — Termine des Tages, „The One Thing“, drei Tageskarten (Pflicht/Körper/Geist), Attention-Check, Mini-Journal |
 | 2 | **Kompass** | Leitbild, Werte, Vorbild-Qualitäten, **Ziele am Horizont**, die 25/5-Liste, Anti-Vision, Phasen, „Nicht mein Maßstab“ — leeres Gerüst, alles selbst zu füllen |
-| 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (7, 14, 30, 60, 90 Tage, Halbjahr, Jahr oder eigene Daten), Ziele mit optionalem Denkrahmen, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
+| 3 | **Saison** | voll funktionsfähig — frei wählbarer Zeitraum (7, 14, 30, 60, 90 Tage, Halbjahr, Jahr oder eigene Daten; Standard 60 Tage), **25/5 mit echten Zielen** — fünf laufen parallel, bis zu 25 stehen auf der Liste —, Denkrahmen je Ziel, Termine, „Nicht jetzt“-Liste, Monatsreflexion |
 | 4 | **Bereiche** | voll funktionsfähig — **frei anlegbar und löschbar**, jeder mit Leitbild, Fokus, Zielen, Gewohnheiten, Projekten, Prinzipien, Notizen und Rückblick; optionale Werkzeuge (Praxis, Protokoll, Menschen, Prüfungen, Bewerbungen, Bibliothek, Finanzen) statt fester Ansichten; Verlinkung zu Heute, Woche und Saison |
 | 5 | **Projekte** | voll funktionsfähig — zentrale Inbox mit wöchentlicher Review, **25/5** (fünf parallel, zwanzig in der Pipeline), Workflow mit Voraussetzungen je Stufe, eigene Aufgaben je Projekt, Verlinkung zu Heute, Woche und Saison |
 | 6 | **Woche** | voll funktionsfähig — Wochenfokus, Sieben-Tage-Kalender mit anklickbaren, bearbeitbaren Terminen (Von/Bis, Notiz), Kapazitätsanzeige, Wochenreview mit fünf Fragen, Einschätzung 1–10, Abschließen ins Archiv und **Verlauf über die Wochen** |
@@ -47,9 +47,16 @@ einen Rahmen — die zusätzlichen Felder erscheinen erst dann:
 - **OKR** — ein Objective, drei Key Results
 - **WOOP** — Wunsch, Ergebnis, inneres Hindernis, Wenn-Dann-Plan
 
-Dazu die **25/5-Liste** im Kompass: fünfundzwanzig Ziele aufschreiben, fünf
-wählen — die übrigen zwanzig werden nicht zur Warteschlange, sondern zur
-Vermeidungsliste.
+Das 25/5-Prinzip taucht auf zwei Ebenen auf, mit verschiedenem Horizont:
+
+- **Kompass** — die Lebensliste: fünfundzwanzig Ambitionen aufschreiben, fünf
+  wählen; die übrigen zwanzig werden nicht zur Warteschlange, sondern zur
+  Vermeidungsliste.
+- **Saison** — dieselbe Regel auf echte Ziele angewandt: fünf laufen parallel,
+  bis zu fünfundzwanzig stehen auf der Liste, und alles davon soll in sechzig
+  Tagen machbar sein. Was länger braucht, gehört in den Kompass.
+
+Projekte folgen derselben Zahl: fünf aktiv, zwanzig in der Pipeline.
 
 ## Löschen
 

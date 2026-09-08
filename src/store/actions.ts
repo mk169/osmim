@@ -114,6 +114,14 @@ export function removeInbox(state: AppState, id: ID): AppState {
 export const ACTIVE_PROJECT_LIMIT = 5;
 export const PIPELINE_LIMIT = 20;
 
+/**
+ * 25/5 auf Saisonebene: fünf Ziele laufen parallel, fünfundzwanzig stehen
+ * insgesamt auf der Liste. Alles davon soll in sechzig Tagen machbar sein.
+ */
+export const SEASON_ACTIVE_LIMIT = 5;
+export const SEASON_POOL_LIMIT = 25;
+export const SEASON_DEFAULT_DAYS = 60;
+
 export function activeProjects(state: AppState): Project[] {
   return state.projects.filter((p) => p.status === 'active');
 }
